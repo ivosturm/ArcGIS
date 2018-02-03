@@ -690,7 +690,7 @@ define("ArcGIS/widget/ArcGIS",
 								
 							}
 						} else if (layerObj.serverType === 'FeatureServer'){
-							// set FeatuteLayer specific options
+							// set FeatureLayer specific options
 							layerOpts.mode = esri.layers.FeatureLayer.MODE_SNAPSHOT;
 							layerOpts.outFields = this.queryOutFieldsArr;
 							layerOpts.infoTemplate = this.infotemplate;
@@ -705,11 +705,11 @@ define("ArcGIS/widget/ArcGIS",
 							}
 							
 							if (this._queryDefinition){
-								var symbol = new esri.symbol.SimpleFillSymbol().setColor(new esri.Color([255,0,0,0.5]));
-
-								var renderer = this._createRenderer();
-								arcGisLayer.setRenderer(renderer);	
-								
+								// only update marker symbols if points are plotted according to the layer settings
+								if (layerObj.geometryType == 'point'){
+									var renderer = this._createRenderer();
+									arcGisLayer.setRenderer(renderer);	
+								}
 								if (!this.showAllObjectsInLayer){
 									// enforce query definition on objects shown on map					
 									arcGisLayer.setDefinitionExpression(this._queryDefinition);
