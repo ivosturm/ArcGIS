@@ -1,17 +1,16 @@
 /*
-
     ArcGIS Widget
     ========================
 
     @file      : arcgis.js
     @version   : 1.1.0
     @author    : Ivo Sturm
-    @date      : 06-08-2018
+    @date      : 11-08-2018
     @copyright : First Consulting
     @license   : Apache v2
-
-    Documentation
-    ========================
+	
+	Documentation
+	========================	
 	This widget caters for simple usage of predefined ArcGIS layers, using the JavaScript API. The full API is loaded into the filesystem, because it gave too many problems with the Mendix Dojo implementation.
 	
 	Releases
@@ -34,7 +33,7 @@
 	v1.1.0	Upgrade to Mendix 7
 	•	change in lib/esri/kernel.js file
 	•	introduced relative paths for all libraries loaded, since in Mendix 7 Mendix sometimes tried to retrieve from clientsystem instead of ArcGIS folders..
-
+	•	got rid of deprecated store.caller and changed it to origin.
  	
 	Not in this version
 	========================
@@ -42,7 +41,6 @@
 	- Authentication
 		
 */
-
 var dojoConfig = {
     async: false,
     locale: 'en',
@@ -350,7 +348,8 @@ require(dojoConfig, [], function() {
 			_newMxObjects: [],
 			_queryDefinition: null,
 			_queryLayerObj:null,
-							
+			_originalRenderer: null,  // used to store updated symbols for graphis in, see renderer functions
+								
 			constructor: function(params, srcNodeRef){
 				if (this.consoleLogging){
 					console.log(this.id + ".constructor");
@@ -725,13 +724,13 @@ require(dojoConfig, [], function() {
 								}
 								
 								if (this._queryDefinition){
-									var symbol = new esri.symbol.SimpleFillSymbol().setColor(new esri.Color([255,0,0,0.5]));
-
-									var renderer = this._createRenderer();
-									arcGisLayer.setRenderer(renderer);	
-									
-									if (!this.showAllObjectsInLayer){
-										// enforce query definition on objects shown on map					
+									// only overrule default ArcGIS styling when asked for in Modeler
+									if (this.enableCustomMarker) {
+										var uniqueValueRenderer = this._updateRenderer(arcGisLayer.renderer);
+										arcGisLayer.setRenderer(uniqueValueRenderer);
+									}
+									if (!this.showAllObjectsInLayer) {
+										// enforce query definition on objects shown on map
 										arcGisLayer.setDefinitionExpression(this._queryDefinition);
 									}
 								}
@@ -773,19 +772,20 @@ require(dojoConfig, [], function() {
 				if (layerID){
 					
 					var updateLayer = this._gisMap.getLayer(layerID);
-					
-					var renderer = this._createRenderer();
-					updateLayer.setRenderer(renderer);		
-								
+
+					var uniqueValueRenderer = this._updateRenderer(updateLayer.renderer);
+					updateLayer.setRenderer(uniqueValueRenderer);
+
+
 					// create new querydefinition
 					this._queryDefinition = this._createQueryDefinition();
-					if (!this.showAllObjectsInLayer){
+					if (!this.showAllObjectsInLayer) {
 
-						// enforce query definition				
+						// enforce query definition
 						updateLayer.setDefinitionExpression(this._queryDefinition);
-					}			
+					}
 					// applying querydefintion to layer which results in getting and setting extent on this._gisMap
-					this._getExtentFromQueryDef(this._queryLayerObj,this._queryDefinition);
+					this._getExtentFromQueryDef(this._queryLayerObj, this._queryDefinition);
 					
 				} 
 			},
@@ -803,68 +803,106 @@ require(dojoConfig, [], function() {
 					return esri.symbol.SimpleMarkerSymbol.STYLE_X;
 				} 
 			},
-			_createRenderer : function(){
-				
+			_updateRenderer: function (rendererLayer) {
+
 				// determine symbol
 				this._simpleMarkerSymbol = this._createSimpleMarkerSymbol();
-														
+
 				var objectid,
 				color,
-				defaultColor = this.defaultColor;
-				
-				var defaultColorBorderColor = defaultColor.split(",");
-				var defaultColorFillColor = (defaultColor + ",0.8").split(",");			
-											
-				// new symbol based on color of object
-				var defaultSymbol = new esri.symbol.SimpleMarkerSymbol(this._simpleMarkerSymbol, 10,
-					new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-						new esri.Color(defaultColorBorderColor), 4), 			// border color
-						new esri.Color(defaultColorFillColor)					// fill color
-				); 
+				defaultColor = this.defaultColor,
+				defaultSymbol;
 
-				//create renderer
-				var renderer = new esri.renderer.UniqueValueRenderer(defaultSymbol, this.arcGISID);
-				renderer.defaultLabel = this.defaultLabel;
+				var defaultColorBorderColor = defaultColor.split(",");
+				var defaultColorFillColor = (defaultColor + ",0.8").split(",");
+
+				if (this.enableCustomMarker) {
+					// new symbol based on color of object
+					defaultSymbol = new esri.symbol.SimpleMarkerSymbol(this._simpleMarkerSymbol, 10,
+							new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+								new esri.Color(defaultColorBorderColor), 4), // border color
+							new esri.Color(defaultColorFillColor) // fill color
+						);
+				} else {
+					defaultSymbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
+							new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+								new esri.Color(defaultColorBorderColor), 4), new esri.Color(defaultColorFillColor))
+				}			
+			
+			
+				var layerSymbol = rendererLayer.symbol;
+
+				var renderer; 
+				if (!layerSymbol && this._originalRenderer){
+					layerSymbol = this._originalRenderer.defaultSymbol;
+	
+					renderer = this._originalRenderer;
+				} 
+				else if (!layerSymbol){
+
+					renderer = new esri.renderer.UniqueValueRenderer(defaultSymbol, this.arcGISID);
+					this._originalRenderer = renderer;
+				}
+				else {
+
+					renderer = new esri.renderer.UniqueValueRenderer(layerSymbol, this.arcGISID);
+					this._originalRenderer = renderer;
+				}			
 				
-				for (var e = 0 ; e < this._referenceMxObjectsArr.length ; e++){
+				renderer.defaultLabel = this.defaultLabel;
+
+
+				for (var e = 0; e < this._referenceMxObjectsArr.length; e++) {
+					
 					objectid = this._referenceMxObjectsArr[e].get(this.objectIDAttr);
 					color = this._referenceMxObjectsArr[e].get(this.colorAttr);
+										
+					var featureColorBorderColor = color.split(","),
+					featureColorFillColor = (color + ",0.8").split(","),
+					newSymbol;
 					
-					var featureColorBorderColor = color.split(",");
-					var featureColorFillColor = (color + ",0.8").split(",");			
-											
-					// new symbol based on color of object
-					var newSymbol = new esri.symbol.SimpleMarkerSymbol(this._simpleMarkerSymbol, 10,
-						new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-							new esri.Color(featureColorBorderColor), 4), 			// border color
-							new esri.Color(featureColorFillColor)					// fill color
-					); 
+					if (this.enableCustomMarker) {
+						// new marker symbol based on color of object
+						newSymbol = new esri.symbol.SimpleMarkerSymbol(this._simpleMarkerSymbol, 10,
+								new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+									new esri.Color(featureColorBorderColor), 2), // border color
+								new esri.Color(featureColorFillColor) // fill color
+							);
+					} else {
+						// new non marker symbol (leave as is - no overrule)
+						newSymbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
+								new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+									new esri.Color(featureColorBorderColor), 2), new esri.Color(featureColorFillColor));
+					}
 
 					// find label configured for this color
-					var colorLabelInstance = this.colorArray.filter(lang.hitch(this,function( instance ) {
-						return instance.featureColor == color;
-					}))[0];
-				
+					var colorLabelInstance = this.colorArray.filter(lang.hitch(this, function (instance) {
+								return instance.featureColor == color;
+							}))[0];
+
 					//add symbol for each possible value
-					if (color){				
+					if (color) {
+						var infoValue;
 						// if label found in array, use this label
-						if (colorLabelInstance){
+						if (colorLabelInstance) {
 							var featureColorLabel = colorLabelInstance.featureColorLabel;
-							renderer.addValue({
-								value: objectid, 
+							infoValue = {
+								value: objectid,
 								symbol: newSymbol,
 								label: featureColorLabel
-							});
+							};
+
 						} else {
-							renderer.addValue({
-								value: objectid, 
+							infoValue = {
+								value: objectid,
 								symbol: newSymbol,
 								label: "Label Unknown"
-							});
+							}
 						}
-					} 
-					
+						renderer.addValue(infoValue);						
+					}		
 				}
+
 				return renderer;
 			},
 			_execMf : function (mxobj, context) {
@@ -883,9 +921,7 @@ require(dojoConfig, [], function() {
 							actionname: context.onClickMF,
 							guids: [guid]
 						},
-						store: {
-							caller: context.mxform
-						},
+						origin: this.mxform,
 						callback: lang.hitch(context, function (obj) {
 
 						}),
@@ -907,9 +943,7 @@ require(dojoConfig, [], function() {
 							applyto: 'none',
 							actionname: this.getHostNameMF
 						},
-						store: {
-							caller: this.mxform
-						},
+						origin: this.mxform,
 						callback: lang.hitch(this, function (stringResult) {
 							// set the hostname retrieved from the datasource MF
 							this.hostName = stringResult;
@@ -921,9 +955,7 @@ require(dojoConfig, [], function() {
 										applyto: 'none',
 										actionname: this.getFeatureServerNameMF
 									},
-									store: {
-										caller: this.mxform
-									},
+									origin: this.mxform,
 									callback: lang.hitch(this, function (stringResult) {
 										this._layerName = stringResult;
 										// Can be a heavy function when having 100+ objects related to the DataView object
@@ -1530,9 +1562,7 @@ require(dojoConfig, [], function() {
 							actionname: this._getObjectsMF,
 							guids: [guid]
 						},
-						store: {
-							caller: this.mxform
-						},
+						origin: this.mxform,
 						callback: lang.hitch(this, function (objs) {
 							if (this.consoleLogging){
 								console.log(this._logNode + "Received " + objs.length + " MxObjects: ");
