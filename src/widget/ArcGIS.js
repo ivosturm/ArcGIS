@@ -3,9 +3,9 @@
     ========================
 
     @file      : arcgis.js
-    @version   : 1.1.0
+    @version   : 1.1.1
     @author    : Ivo Sturm
-    @date      : 11-08-2018
+    @date      : 12-08-2018
     @copyright : First Consulting
     @license   : Apache v2
 	
@@ -15,25 +15,29 @@
 	
 	Releases
 	========================
-	v1.0	First version. Features supporteed: •	Loosely connect ArcGIS and Mendix database with single ArcGIS ObjectID in Mendix;
-	•	Plot both Map Server and Feature Server Layers;
-	•	Toggling Layer visibility;
-	•	Show all objects in Layer or only restrict to objects in Mendix
+	v1.0	First version. Features supported: 
+	- Loosely connect ArcGIS and Mendix database with single ArcGIS ObjectID in Mendix;
+	- Plot both Map Server and Feature Server Layers;
+	- Toggling Layer visibility;
+	- Show all objects in Layer or only restrict to objects in Mendix
 		o	XPath;
 		o	DataSource;
 		o	ListenToGrid;
-	•	Fully customize InfoWindow;
+	- Fully customize InfoWindow;
 		o	On Click Microflow to trigger Mendix logic from infowindow;
-	•	Customize marker by changing symbol and color;
-	•	Legend;
+	- Customize marker by changing symbol and color;
+	- Legend;
 		o	Set a label in the legend per Color
-	•	Search widget with autocomplete to easily zoom to certain address;
-	•	Custom styling settings to incorporate company specific coloring;
+	- Search widget with autocomplete to easily zoom to certain address;
+	- Custom styling settings to incorporate company specific coloring;
 	
 	v1.1.0	Upgrade to Mendix 7
-	•	change in lib/esri/kernel.js file
-	•	introduced relative paths for all libraries loaded, since in Mendix 7 Mendix sometimes tried to retrieve from clientsystem instead of ArcGIS folders..
-	•	got rid of deprecated store.caller and changed it to origin.
+	- change in lib/esri/kernel.js file
+	- introduced relative paths for all libraries loaded, since in Mendix 7 Mendix sometimes tried to retrieve from clientsystem instead of ArcGIS folders..
+	- got rid of deprecated store.caller and changed it to origin.
+	
+	v1.1.1
+	- added enabling / disabling for custom styling of polygons (coloring) and point (coloring + marker type)
  	
 	Not in this version
 	========================
@@ -224,7 +228,6 @@ require(dojoConfig, [], function() {
 	'ArcGIS/lib/esri/tasks/QueryTask', 
 	'ArcGIS/lib/esri/tasks/RelationshipQuery', 
 	'ArcGIS/lib/esri/tasks/StatisticDefinition', 
-
 	'ArcGIS/lib/esri/dijit/_EventedWidget', 
 	'ArcGIS/lib/esri/dijit/PopupRenderer', 
 	'ArcGIS/lib/esri/PopupInfo', 
@@ -725,8 +728,8 @@ require(dojoConfig, [], function() {
 								
 								if (this._queryDefinition){
 									// only overrule default ArcGIS styling when asked for in Modeler
-									if (this.enableCustomMarker) {
-										var uniqueValueRenderer = this._updateRenderer(arcGisLayer.renderer);
+									if (this.enableCustomStyling) {
+										var uniqueValueRenderer = this._updateRenderer(arcGisLayer,layerObj.geometryType);
 										arcGisLayer.setRenderer(uniqueValueRenderer);
 									}
 									if (!this.showAllObjectsInLayer) {
@@ -753,29 +756,26 @@ require(dojoConfig, [], function() {
 				this._setupEvents();
 
 				this._gisMap.addLayers(this.arcGisLayerArr);
-		
-				// add layer-add-result handler to gismap
-				//this._layerAddResultsEventHandler(this.arcGisLayerArr);						
-					
+											
 			},
 			_refreshMap : function(objs){
 
 				var gisMapIds = this._gisMap.graphicsLayerIds;
-				var symbol = new esri.symbol.SimpleFillSymbol().setColor(new esri.Color([255,0,0,0.5]));
 				// get the layer that is being queried on				
 				var layerID = gisMapIds.filter(lang.hitch(this,function( id ) {
 
 				  return id = this._queryLayerObj.id;
 				}))[0];
-
+				
 				// only when reference DataView and Reference Entity have been set, narrow down objects by adding a queryDefinition
 				if (layerID){
 					
 					var updateLayer = this._gisMap.getLayer(layerID);
 
-					var uniqueValueRenderer = this._updateRenderer(updateLayer.renderer);
-					updateLayer.setRenderer(uniqueValueRenderer);
-
+					if (this.enableCustomStyling){
+						var uniqueValueRenderer = this._updateRenderer(updateLayer, this._queryLayerObj.geometryType);
+						updateLayer.setRenderer(uniqueValueRenderer);
+					}
 
 					// create new querydefinition
 					this._queryDefinition = this._createQueryDefinition();
@@ -803,7 +803,7 @@ require(dojoConfig, [], function() {
 					return esri.symbol.SimpleMarkerSymbol.STYLE_X;
 				} 
 			},
-			_updateRenderer: function (rendererLayer) {
+			_updateRenderer: function (layer,geometryType) {
 
 				// determine symbol
 				this._simpleMarkerSymbol = this._createSimpleMarkerSymbol();
@@ -811,12 +811,17 @@ require(dojoConfig, [], function() {
 				var objectid,
 				color,
 				defaultColor = this.defaultColor,
-				defaultSymbol;
+				defaultSymbol,
+				renderer;
 
 				var defaultColorBorderColor = defaultColor.split(",");
-				var defaultColorFillColor = (defaultColor + ",0.8").split(",");
-
-				if (this.enableCustomMarker) {
+				var defaultColorFillColor;
+				if (geometryType == "point"){
+					defaultColorFillColor = (defaultColor + ",0.8").split(",");
+				} else {
+					defaultColorFillColor = (defaultColor + ",0.25").split(",");
+				}	
+				if (geometryType == "point") {
 					// new symbol based on color of object
 					defaultSymbol = new esri.symbol.SimpleMarkerSymbol(this._simpleMarkerSymbol, 10,
 							new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
@@ -826,42 +831,55 @@ require(dojoConfig, [], function() {
 				} else {
 					defaultSymbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
 							new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-								new esri.Color(defaultColorBorderColor), 4), new esri.Color(defaultColorFillColor))
+								new esri.Color(defaultColorBorderColor), 1), new esri.Color(defaultColorFillColor))
 				}			
-			
-			
-				var layerSymbol = rendererLayer.symbol;
+				var layerSymbol;
 
-				var renderer; 
-				if (!layerSymbol && this._originalRenderer){
-					layerSymbol = this._originalRenderer.defaultSymbol;
-	
-					renderer = this._originalRenderer;
+				// try to retrieve original symbol if renderer is SimpleRenderer
+				if (layer.renderer && layer.renderer.symbol){
+					console.log(1);
+					console.dir(layerSymbol);
+					layerSymbol = layer.renderer.symbol;
+					
 				} 
-				else if (!layerSymbol){
-
-					renderer = new esri.renderer.UniqueValueRenderer(defaultSymbol, this.arcGISID);
-					this._originalRenderer = renderer;
+				// if different layer type, retrieve symbol from first graphic, assuming all are same in layer
+				else if (layer.graphics[0]){
+					console.log(2);
+					console.dir(layerSymbol);
+					layerSymbol = layer.graphics[0].symbol;
+					
 				}
+				// if all fails, resort to defaultSymbol 
 				else {
+					layerSymbol = defaultSymbol;
+				}
 
-					renderer = new esri.renderer.UniqueValueRenderer(layerSymbol, this.arcGISID);
-					this._originalRenderer = renderer;
-				}			
-				
+				// at intial load original renderer not yet stored -> store!
+				if (!this._originalRenderer){				
+
+					this._originalRenderer = new esri.renderer.UniqueValueRenderer(layerSymbol, this.arcGISID);
+					
+				} 
+				renderer = this._originalRenderer;	
+						
 				renderer.defaultLabel = this.defaultLabel;
-
-
+				
 				for (var e = 0; e < this._referenceMxObjectsArr.length; e++) {
 					
 					objectid = this._referenceMxObjectsArr[e].get(this.objectIDAttr);
 					color = this._referenceMxObjectsArr[e].get(this.colorAttr);
 										
 					var featureColorBorderColor = color.split(","),
-					featureColorFillColor = (color + ",0.8").split(","),
+					featureColorFillColor,
 					newSymbol;
 					
-					if (this.enableCustomMarker) {
+					if (geometryType == "point"){
+						featureColorFillColor = (color + ",0.8").split(",");
+					} else {
+						featureColorFillColor = (color + ",0.25").split(",");
+					}	
+					
+					if (geometryType == "point") {
 						// new marker symbol based on color of object
 						newSymbol = new esri.symbol.SimpleMarkerSymbol(this._simpleMarkerSymbol, 10,
 								new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
@@ -872,7 +890,7 @@ require(dojoConfig, [], function() {
 						// new non marker symbol (leave as is - no overrule)
 						newSymbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
 								new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-									new esri.Color(featureColorBorderColor), 2), new esri.Color(featureColorFillColor));
+									new esri.Color(featureColorBorderColor), 1), new esri.Color(featureColorFillColor));
 					}
 
 					// find label configured for this color
@@ -921,7 +939,7 @@ require(dojoConfig, [], function() {
 							actionname: context.onClickMF,
 							guids: [guid]
 						},
-						origin: this.mxform,
+						origin: context.mxform,
 						callback: lang.hitch(context, function (obj) {
 
 						}),
