@@ -3,7 +3,7 @@
     ========================
 
     @file      : arcgis.js
-    @version   : 1.1.1
+    @version   : 1.2.0
     @author    : Ivo Sturm
     @date      : 12-08-2018
     @copyright : First Consulting
@@ -38,6 +38,9 @@
 	
 	v1.1.1
 	- added enabling / disabling for custom styling of polygons (coloring) and point (coloring + marker type)
+	
+	v1.2.0
+	- no change, only updated uglified js version which gave multiDefine errors
  	
 	Not in this version
 	========================
