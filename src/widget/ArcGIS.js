@@ -3,9 +3,9 @@
     ========================
 
     @file      : arcgis.js
-    @version   : 1.2.0
+    @version   : 1.2.1
     @author    : Ivo Sturm
-    @date      : 12-08-2018
+    @date      : 30-01-2019
     @copyright : First Consulting
     @license   : Apache v2
 	
@@ -41,6 +41,9 @@
 	
 	v1.2.0
 	- no change, only updated uglified js version which gave multiDefine errors
+	
+	v1.2.1
+	- changed relative path for dojox folders to ArcGIS/lib/dojox since as of Mendix 7.22 some dojox modules have been removed from Mendix hence should be retrieved from widget instead.
  	
 	Not in this version
 	========================
@@ -85,38 +88,38 @@ require(dojoConfig, [], function() {
 	'dijit/registry',
 	'dojo/text!./template/ArcGIS.html',
 	// now all ArcGIS files
-	'dojox/gfx/Mover',
-	'dojox/gfx/Moveable',
-	'dojox/gfx/_base',
-	'dojox/gfx/matrix',
-	'dojox/gfx/renderer',
-	'dojox/gfx/svg',
-	'dojox/gfx/filters',
-	'dojox/gfx/svgext',
-	'dojox/gfx',
-	'dojox/collections/_base',
-	'dojox/collections/ArrayList',
-	'dojox/grid/util',
+	'ArcGIS/lib/dojox/gfx/Mover',
+	'ArcGIS/lib/dojox/gfx/Moveable',
+	'ArcGIS/lib/dojox/gfx/_base',
+	'ArcGIS/lib/dojox/gfx/matrix',
+	'ArcGIS/lib/dojox/gfx/renderer',
+	'ArcGIS/lib/dojox/gfx/svg',
+	'ArcGIS/lib/dojox/gfx/filters',
+	'ArcGIS/lib/dojox/gfx/svgext',
+	'ArcGIS/lib/dojox/gfx',
+	'ArcGIS/lib/dojox/collections/_base',
+	'ArcGIS/lib/dojox/collections/ArrayList',
+	'ArcGIS/lib/dojox/grid/util',
 	'dojox/main',
-	'dojox/grid/cells/_base',
-	'dojox/grid/cells',	
-	'dojox/grid/_Events',
-	'dojox/grid/_Scroller',
-	'dojox/html/metrics',
-	'dojox/grid/_Builder',
-	'dojox/grid/_View',
-	'dojox/grid/Selection',
-	'dojox/grid/_SelectionPreserver',
-	'dojox/grid/DataSelection',
-	'dojox/grid/_RowSelector',
-	'dojox/grid/_Layout',
-	'dojox/grid/_ViewManager',
-	'dojox/grid/_RowManager',
-	'dojox/grid/_FocusManager',
-	'dojox/grid/_EditManager',
-	'dojox/grid/_Grid',
-	'dojox/grid/DataGrid',
-	'dojox/html/entities',
+	'ArcGIS/lib/dojox/grid/cells/_base',
+	'ArcGIS/lib/dojox/grid/cells',	
+	'ArcGIS/lib/dojox/grid/_Events',
+	'ArcGIS/lib/dojox/grid/_Scroller',
+	'ArcGIS/lib/dojox/html/metrics',
+	'ArcGIS/lib/dojox/grid/_Builder',
+	'ArcGIS/lib/dojox/grid/_View',
+	'ArcGIS/lib/dojox/grid/Selection',
+	'ArcGIS/lib/dojox/grid/_SelectionPreserver',
+	'ArcGIS/lib/dojox/grid/DataSelection',
+	'ArcGIS/lib/dojox/grid/_RowSelector',
+	'ArcGIS/lib/dojox/grid/_Layout',
+	'ArcGIS/lib/dojox/grid/_ViewManager',
+	'ArcGIS/lib/dojox/grid/_RowManager',
+	'ArcGIS/lib/dojox/grid/_FocusManager',
+	'ArcGIS/lib/dojox/grid/_EditManager',
+	'ArcGIS/lib/dojox/grid/_Grid',
+	'ArcGIS/lib/dojox/grid/DataGrid',
+	'ArcGIS/lib/dojox/html/entities',
 	'ArcGIS/lib/esri/nls/jsapi',
 	'ArcGIS/lib/esri/kernel',
 	'ArcGIS/lib/esri/lang',	
