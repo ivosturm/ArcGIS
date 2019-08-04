@@ -1,11 +1,10 @@
 /*
     ArcGIS Widget
     ========================
-
     @file      : arcgis.js
-    @version   : 1.2.1
+    @version   : 1.2.2
     @author    : Ivo Sturm
-    @date      : 30-01-2019
+    @date      : 04-08-2019
     @copyright : First Consulting
     @license   : Apache v2
 	
@@ -45,6 +44,9 @@
 	v1.2.1
 	- changed relative path for dojox folders to ArcGIS/lib/dojox since as of Mendix 7.22 some dojox modules have been removed from Mendix hence should be retrieved from widget instead.
  	
+	v1.2.2
+	- fix for unsubscribe not working in listen-to-grid scenario in Mendix 7.23.6 not working anymore. removed some obsolete logging as well
+	
 	Not in this version
 	========================
 	- Editing / Drawing
@@ -429,8 +431,8 @@ require(dojoConfig, [], function() {
 					console.log(this.id + ".resetSubscriptions");
 				}
 				if (this._handles) {
-					for (var handle in this._handles){
-						this.unsubscribe(handle);
+					for (var k = 0 ; k<this._handles.length ; k++) {
+						this.unsubscribe(this._handles[k]);
 					}
 					
 					this._handles = [];
@@ -850,8 +852,6 @@ require(dojoConfig, [], function() {
 				} 
 				// if different layer type, retrieve symbol from first graphic, assuming all are same in layer
 				else if (layer.graphics[0]){
-					console.log(2);
-					console.dir(layerSymbol);
 					layerSymbol = layer.graphics[0].symbol;
 					
 				}
