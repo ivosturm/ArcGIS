@@ -68,7 +68,8 @@ var dojoConfig = {
 };
 
 require(dojoConfig, [], function() {
-	return define("ArcGIS/widget/ArcGIS", [ // it is import to load the js files in the correct order. So, if js file A needs B, first load B then A, else Mendix will search for the file in it's own filesystem / mxclientsystem and will fail
+	return define("ArcGIS/widget/ArcGIS", [
+		// it is import to load the js files in the correct order. So, if js file A needs B, first load B then A, else Mendix will search for the file in it's own filesystem / mxclientsystem and will fail
 		"dojo/_base/declare",
 		"mxui/dom",
 		"dojo/dom",
@@ -288,6 +289,7 @@ require(dojoConfig, [], function() {
 		"ArcGIS/lib/esri/dijit/_EventedWidget",
 		"ArcGIS/lib/esri/dijit/Legend",
 		"ArcGIS/lib/esri/tasks/Task",
+		"ArcGIS/lib/esri/tasks/GeometryService",
 		"ArcGIS/lib/esri/tasks/IdentifyResult",
 		"ArcGIS/lib/esri/tasks/IdentifyParameters",
 		"ArcGIS/lib/esri/tasks/IdentifyTask",
@@ -398,6 +400,11 @@ require(dojoConfig, [], function() {
 				this._referenceMxObjectsArr = []; // used to store GIS objects in
 				this._initialLoad = true;
 
+				//setup geometryService
+				this.geometryService = new esri.tasks.GeometryService(
+					"https://utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer"
+				);
+
 				// since DojoParser with a template is not working, on advise of Jelte Lagendijk from Mendix, we create all needed child widgets in a separate function.
 				// in callback trigger custom styling after load of all HTML elements
 				this._createTemplate();
@@ -416,10 +423,10 @@ require(dojoConfig, [], function() {
 
 				// Widget configured variables
 				this.GPSLatitude = this._contextObj
-					? this._contextObj.get(this.GPSLatitude)
+					? this._contextObj.get(this.GPSLatitude).toString()
 					: null;
 				this.GPSLongitude = this._contextObj
-					? this._contextObj.get(this.GPSLongitude)
+					? this._contextObj.get(this.GPSLongitude).toString()
 					: null;
 				this.objectid = this._contextObj
 					? this._contextObj.get(this.objectIDAttr)
@@ -479,11 +486,6 @@ require(dojoConfig, [], function() {
 				if (this.consoleLogging) {
 					console.log(this._logNode + "._loadMap");
 				}
-
-				this._defaultPosition = new esri.geometry.Point(
-					Number(this.GPSLongitude),
-					Number(this.GPSLatitude)
-				);
 
 				//This specifies the symbols highlighting selected/queried objects
 				var popup = new esri.dijit.Popup(
@@ -634,7 +636,6 @@ require(dojoConfig, [], function() {
 				}
 				this._gisMap = new esri.Map(this.mapContainer, {
 					basemap: "topo",
-					center: this._defaultPosition,
 					zoom: this.defaultZoom,
 					sliderStyle: "small",
 					infoWindow: popup
@@ -662,6 +663,11 @@ require(dojoConfig, [], function() {
 						// add layer-add-result handler to gismap
 						this._layerAddResultsEventHandler(layers);
 					})
+				);
+				this._zoomToLocation(
+					Number(this.GPSLongitude),
+					Number(this.GPSLatitude),
+					this.defaultZoom
 				);
 
 				var toggle = new esri.dijit.BasemapToggle(
@@ -860,6 +866,19 @@ require(dojoConfig, [], function() {
 
 				this._gisMap.addLayers(this.arcGisLayerArr);
 			},
+			_zoomToLocation: function(longitude, latitude, zoom) {
+				if (longitude !== 0 && latitude !== 0) {
+					var locationPt = new esri.geometry.Point(longitude, latitude);
+
+					this.geometryService.project(
+						[locationPt],
+						new esri.SpatialReference({ wkid: Number(this.spatialReference) }),
+						function(projectedPoints) {
+							this._gisMap.centerAndZoom(projectedPoints[0], zoom);
+						}.bind(this)
+					);
+				}
+			},
 			_refreshMap: function(objs) {
 				var gisMapIds = this._gisMap.graphicsLayerIds;
 				// get the layer that is being queried on
@@ -886,12 +905,12 @@ require(dojoConfig, [], function() {
 					if (!this.showAllObjectsInLayer) {
 						// enforce query definition
 						updateLayer.setDefinitionExpression(this._queryDefinition);
+						// applying querydefintion to layer which results in getting and setting extent on this._gisMap
+						this._getExtentFromQueryDef(
+							this._queryLayerObj,
+							this._queryDefinition
+						);
 					}
-					// applying querydefintion to layer which results in getting and setting extent on this._gisMap
-					this._getExtentFromQueryDef(
-						this._queryLayerObj,
-						this._queryDefinition
-					);
 				}
 			},
 			_createSimpleMarkerSymbol: function() {
