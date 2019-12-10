@@ -400,6 +400,12 @@ require(dojoConfig, [], function() {
 				this._resetSubscriptions();
 							
 				// Widget configured variables		
+				this.GPSLatitude = this._contextObj
+					? this._contextObj.get(this.GPSLatitude)
+					: null;
+				this.GPSLongitude = this._contextObj
+					? this._contextObj.get(this.GPSLongitude)
+					: null;
 				this.objectid = this._contextObj ? this._contextObj.get(this.objectIDAttr) : null;
 				this.centerCoordinates = this._contextObj ? this._contextObj.get(this.centerAttr) : null;
 				this.geometryType = this._contextObj ? this._contextObj.get(this.geometryTypeAttr) : null;
