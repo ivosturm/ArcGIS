@@ -457,9 +457,12 @@ require(dojoConfig, [], function() {
 					console.log(this._logNode + "._loadMap");
 				}
 
-				this._SpatialReference = new esri.SpatialReference(Number(this.spatialReference));
-				this._defaultPosition = new esri.geometry.Point(Number(this.defaultX), Number(this.defaultY), this._SpatialReference);
-				
+				const { GPSLongitude, GPSLatitude } = this.GISObject;
+				this._defaultPosition = new esri.geometry.Point(
+					Number(GPSLongitude),
+					Number(GPSLatitude)
+				);
+
 				//This specifies the symbols highlighting selected/queried objects
 				var popup = new esri.dijit.Popup({
 				  fillSymbol: new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
@@ -1389,27 +1392,19 @@ require(dojoConfig, [], function() {
 					console.log(this._logNode + centerCoordinates);
 					console.log(this._logNode + geometryType);
 				}
-				var centerArray = [],
-				centerX = this.defaultX,
-				centerY = this.defaultY,
-				spatialRef = this._gisMap.spatialReference,
-				centerLocation = new esri.geometry.Point(Number(this.defaultX), Number(this.defaultY), spatialRef);
 				
 				if (id){
+					const spatialRef = this._gisMap.spatialReference;
 					
 					if (centerCoordinates){
-						centerArray = centerCoordinates.split(",");
-						centerX = Number(centerArray[0]);
-						centerY = Number(centerArray[1]);
+						const centerArray = centerCoordinates.split(",");
+						const centerX = Number(centerArray[0]);
+						const centerY = Number(centerArray[1]);						
+						const centerLocation = new esri.geometry.Point(centerX,centerY,spatialRef);
 						
-						centerLocation = new esri.geometry.Point(centerX,centerY,spatialRef);
-						
-						this._gisMap.centerAndZoom(centerLocation,Number(this._singleObjectZoom) - 1);
-						
-					} else {
-					
-					  var q = new esri.tasks.Query();
-					 
+						this._gisMap.centerAndZoom(centerLocation,Number(this._singleObjectZoom) - 1);						
+					} else {					
+						let q = new esri.tasks.Query();					 
 						q.outSpatialReference = spatialRef;
 						q.returnGeometry = true;
 						q.outFields = this.queryOutFieldsArr;
@@ -1418,10 +1413,10 @@ require(dojoConfig, [], function() {
 						q.where = this.arcGISID + "=" + id; 
 
 						// get correct layer from layercache based on geometryType.
-						var layerObj = this.layerArr.filter(lang.hitch(this,function( layer ) {
-
-						  return layer.geometryType == geometryType;
+						const layerObj = this.layerArr.filter(lang.hitch(this,function( layer ) {
+							return layer.geometryType == geometryType;
 						}))[0];
+
 						if (layerObj){
 							this._queryLayer(q,layerObj);
 						} else {
