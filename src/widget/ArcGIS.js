@@ -457,10 +457,9 @@ require(dojoConfig, [], function() {
 					console.log(this._logNode + "._loadMap");
 				}
 
-				const { GPSLongitude, GPSLatitude } = this.GISObject;
 				this._defaultPosition = new esri.geometry.Point(
-					Number(GPSLongitude),
-					Number(GPSLatitude)
+					Number(this.GPSLongitude),
+					Number(this.GPSLatitude)
 				);
 
 				//This specifies the symbols highlighting selected/queried objects
