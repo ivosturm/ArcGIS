@@ -481,7 +481,6 @@ require(dojoConfig, [], function() {
 					console.log(this._logNode + "._loadMap");
 				}
 				
-				
 				this._gpsLocation = await this._getGPSLocation();
 
 				//This specifies the symbols highlighting selected/queried objects
