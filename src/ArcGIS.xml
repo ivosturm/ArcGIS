@@ -108,7 +108,7 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
                 <attributeType name="Decimal" />
             </attributeTypes>
         </property>
-        <property key="getReports" type="microflow" required="false" defaultValue="">
+        <property key="getReportsMF" type="microflow" required="false" defaultValue="">
             <caption>Get Reports Microflow</caption>
             <category>Data Source</category>
             <description>Microflow to retrieve all created reports which should be visible on the ArcGIS Map.</description>
