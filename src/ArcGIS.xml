@@ -96,6 +96,16 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <category>Behavior</category>
             <description>The URL of the satellite base map to load.</description>
         </property>
+        <property key="GPSColor1" type="string" required="false" defaultValue="#b6061b">
+            <caption>Color icon 1</caption>
+            <category>Behavior</category>
+            <description>The color of the fist icon</description>
+        </property>
+        <property key="GPSColor2" type="string" required="false" defaultValue="#e8dd11">
+            <caption>Color icon 2</caption>
+            <category>Behavior</category>
+            <description>The color of the second icon</description>
+        </property>
         <property key="spatialReference" type="string" required="true" defaultValue="10210">
             <caption>Spatial Reference</caption>
             <category>Behavior</category>
