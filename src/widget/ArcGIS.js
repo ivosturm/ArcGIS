@@ -422,12 +422,6 @@ require(dojoConfig, [], function() {
 				this._resetSubscriptions();
 
 				// Widget configured variables
-				this.GPSLatitude = this._contextObj
-					? this._contextObj.get(this.GPSLatitude).toString()
-					: null;
-				this.GPSLongitude = this._contextObj
-					? this._contextObj.get(this.GPSLongitude).toString()
-					: null;
 				this.objectid = this._contextObj
 					? this._contextObj.get(this.objectIDAttr)
 					: null;
@@ -482,10 +476,13 @@ require(dojoConfig, [], function() {
 				}
 			},
 
-			_loadMap: function() {
+			_loadMap: async function() {
 				if (this.consoleLogging) {
 					console.log(this._logNode + "._loadMap");
 				}
+				
+				
+				this._gpsLocation = await this._getGPSLocation();
 
 				//This specifies the symbols highlighting selected/queried objects
 				var popup = new esri.dijit.Popup(
@@ -664,11 +661,21 @@ require(dojoConfig, [], function() {
 						this._layerAddResultsEventHandler(layers);
 					})
 				);
-				this._zoomToLocation(
-					Number(this.GPSLongitude),
-					Number(this.GPSLatitude),
-					this.defaultZoom
-				);
+				
+				if (this._gpsLocation && this.centerOnLocation) {
+					this._zoomToLocation(
+						Number(this._gpsLocation.longitude),
+						Number(this._gpsLocation.latitude),
+						this.defaultZoom
+					);
+				} else {
+					this._zoomToLocation(
+						Number(this.DefaultX),
+						Number(this.defaultY),
+						this.defaultZoom,
+						false
+					)
+				}
 
 				var toggle = new esri.dijit.BasemapToggle(
 					{
@@ -866,17 +873,27 @@ require(dojoConfig, [], function() {
 
 				this._gisMap.addLayers(this.arcGisLayerArr);
 			},
-			_zoomToLocation: function(longitude, latitude, zoom) {
+			_zoomToLocation: function(longitude, latitude, zoom, project = true) {
 				if (longitude !== 0 && latitude !== 0) {
-					var locationPt = new esri.geometry.Point(longitude, latitude);
+					
 
-					this.geometryService.project(
-						[locationPt],
-						new esri.SpatialReference({ wkid: Number(this.spatialReference) }),
-						function(projectedPoints) {
-							this._gisMap.centerAndZoom(projectedPoints[0], zoom);
-						}.bind(this)
-					);
+					if (project) {
+						const locationPt = new esri.geometry.Point(longitude, latitude);
+						this.geometryService.project(
+							[locationPt],
+							new esri.SpatialReference({ wkid: Number(this.spatialReference) }),
+							function(projectedPoints) {
+								this._gisMap.centerAndZoom(projectedPoints[0], zoom);
+							}.bind(this)
+						);
+					} else {						
+						const locationPt = new esri.geometry.Point(
+							longitude,
+							latitude,
+							new esri.SpatialReference({ wkid: Number(this.spatialReference) })
+						);
+						this._gisMap.centerAndZoom(locationPt, zoom);
+					}
 				}
 			},
 			_refreshMap: function(objs) {
@@ -2123,7 +2140,34 @@ require(dojoConfig, [], function() {
 				if (this.consoleLogging) {
 					console.log(this.id + ".uninitialize");
 				}
-			}
+			},
+
+			_getGPSLocation: async function (forceNewLocation = false) {
+				let gpsLocation = undefined;
+
+				if (!forceNewLocation && this.initalGpsLocation !== undefined) {
+					gpsLocation = this.initalGpsLocation;
+				} else if (navigator.geolocation) {
+					gpsLocation = await new Promise(function (resolve) {
+						navigator.geolocation.getCurrentPosition(
+							function (pos) {
+								resolve({
+									latitude: pos.coords.latitude,
+									longitude: pos.coords.longitude
+								});
+							}, function () {
+								resolve(undefined);
+							}
+						);
+					}).then(result => result);
+				}
+
+				if (!this.initalGpsLocation) {
+					this.initalGpsLocation = gpsLocation;
+				}
+				
+				return gpsLocation;
+			},			
 		});
 	});
 });

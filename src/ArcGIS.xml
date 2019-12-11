@@ -57,22 +57,6 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
                 <attributeType name="Integer" />
             </attributeTypes>
         </property>
-        <property key="GPSLongitude" type="attribute" entityProperty="objectEntity" required="true">
-            <caption>GPSLongitude</caption>
-            <category>Data Source</category>
-            <description>Longitude and latitude are used when indicating places on earth and calculating distances and angles. </description>
-            <attributeTypes>
-                <attributeType name="Decimal" />
-            </attributeTypes>
-        </property>
-        <property key="GPSLatitude" type="attribute" entityProperty="objectEntity" required="true">
-            <caption>GPSLatitude</caption>
-            <category>Data Source</category>
-            <description>Longitude and latitude are used when indicating places on earth and calculating distances and angles. </description>
-            <attributeTypes>
-                <attributeType name="Decimal" />
-            </attributeTypes>
-        </property>
         <property key="arcGISID" type="string" required="true" defaultValue="objectid">
             <caption>ArcGIS Identifier Name</caption>
             <category>Data Source</category>
@@ -161,6 +145,11 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <caption>Selected Color</caption>
             <category>Appearance</category>
             <description>The hexadecimal color which will be used for the active pane in the right accordion menu.</description>
+        </property>
+        <property key="centerOnLocation" type="boolean" defaultValue="true">
+            <caption>Center on Location</caption>
+            <category>Behavior</category>
+            <description>Enabling this option will make the map center on current location at start</description>
         </property>
         <property key="defaultY" type="string" defaultValue="680000">
             <caption>Default Y</caption>
