@@ -481,7 +481,6 @@ require(dojoConfig, [], function() {
 					console.log(this._logNode + "._loadMap");
 				}
 				
-				
 				this._gpsLocation = await this._getGPSLocation();
 
 				//This specifies the symbols highlighting selected/queried objects
@@ -660,6 +659,15 @@ require(dojoConfig, [], function() {
 						// add layer-add-result handler to gismap
 						this._layerAddResultsEventHandler(layers);
 					})
+				);
+				//Actions to be executed after the map has finished loading.
+				this._gisMap.on('load',
+					function () {
+                        // attach events to gismap and layer loading
+						this._setupEvents();
+						
+                        this._initNewDeclaration();
+                      }.bind(this)
 				);
 				
 				if (this._gpsLocation && this.centerOnLocation) {
@@ -867,9 +875,6 @@ require(dojoConfig, [], function() {
 						}
 					}
 				}
-
-				// attach events to gismap and layer loading
-				this._setupEvents();
 
 				this._gisMap.addLayers(this.arcGisLayerArr);
 			},
@@ -2144,8 +2149,10 @@ require(dojoConfig, [], function() {
 
 			_getGPSLocation: async function (forceNewLocation = false) {
 				let gpsLocation = undefined;
-
-				if (!forceNewLocation && this.initalGpsLocation !== undefined) {
+				
+				if (this.initalGpsLocation === -1) {
+					return undefined;
+        		} if (!forceNewLocation && this.initalGpsLocation !== undefined) {
 					gpsLocation = this.initalGpsLocation;
 				} else if (navigator.geolocation) {
 					gpsLocation = await new Promise(function (resolve) {
@@ -2156,7 +2163,7 @@ require(dojoConfig, [], function() {
 									longitude: pos.coords.longitude
 								});
 							}, function () {
-								resolve(undefined);
+								resolve(-1);
 							}
 						);
 					}).then(result => result);
@@ -2167,7 +2174,74 @@ require(dojoConfig, [], function() {
 				}
 				
 				return gpsLocation;
-			},			
+			},
+			_projectPoint: async function (point) {
+				return await new Promise(function (resolve) {
+					this.geometryService.project(
+						[point],
+						new esri.SpatialReference({ wkid: Number(this.spatialReference) }),
+						function(projectedPoints) {
+							resolve(projectedPoints[0]);
+						}
+					);
+				}.bind(this))
+				.then(result => result);
+			},
+			
+			_initNewDeclaration: async function () {
+				let location = undefined;	
+				if (this.centerOnLocation && (await this._getGPSLocation())) {
+					const gpslocation = await this._getGPSLocation();
+						location = await this._projectPoint(
+							new esri.geometry.Point(gpslocation.longitude, gpslocation.latitude)
+						);
+					} else {
+						location = new esri.geometry.Point(
+							Number(this.DefaultX),
+							Number(this.defaultY),
+							new esri.SpatialReference({ wkid: Number(this.spatialReference) })
+						);
+				}
+				
+				const symbol = new esri.symbol.SimpleMarkerSymbol(
+					{
+						"color": [255,0,0],
+						"size": 12,
+						"angle": -30,
+						"type": "esriSMS",
+						"style": "esriSMSCircle",
+						"outline": {
+							"color": [0,0,0],
+							"width": 1,
+							"type": "esriSLS",
+							"style": "esriSLSSolid"
+						}
+					}
+				);				
+				const graphic = new esri.Graphic(location, symbol);
+				const layer = this._createNewDeclarationLayer();
+				layer.add(graphic);
+
+				this._gisMap.addLayers([layer]);
+			},
+			_createNewDeclarationLayer: function () {	
+				const layer = new esri.layers.GraphicsLayer({
+					id: "newDeclarationLyr"
+				});
+				//click handlers
+				//Activate the toolbar when you click on a graphic
+				layer.on("click", function(evt) {
+					event.stop(evt);
+					this.editNewDeclarationLyrActive = !this.editNewDeclarationLyrActive;
+					if (this.editNewDeclarationLyrActive) {
+						this._editToolbar.activate(esri.toolbars.Edit.MOVE, evt.graphic);
+					} else {
+						this._editToolbar.deactivate();
+					}
+				}.bind(this));
+
+				return layer;
+			}
 		});
 	});
 });
