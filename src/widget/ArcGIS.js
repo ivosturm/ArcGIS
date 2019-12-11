@@ -2204,11 +2204,11 @@ require(dojoConfig, [], function() {
 				}				
 				
 				const symbol = new esri.symbol.SimpleMarkerSymbol({
-					color: new esri.Color(this.GPSColor1),
+					color: new esri.Color(this.currentLocationColor),
 					size: 12,
 					angle: -30,
 					type: "esriSMS",
-					style: "esriSMSCircle",
+					style: "esriSMSCircle"
 				});				
 				const graphic = new esri.Graphic(location, symbol);
 				const layer = this._createNewDeclarationLayer();
