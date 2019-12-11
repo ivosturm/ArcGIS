@@ -2201,7 +2201,7 @@ require(dojoConfig, [], function() {
 							Number(this.defaultY),
 							new esri.SpatialReference({ wkid: Number(this.spatialReference) })
 						);
-				}
+				}				
 				
 				const symbol = new esri.symbol.SimpleMarkerSymbol({
 					color: new esri.Color(this.GPSColor1),
@@ -2215,6 +2215,8 @@ require(dojoConfig, [], function() {
 				layer.add(graphic);
 
 				this._gisMap.addLayers([layer]);
+				
+				this._updateNewDeclarationLocation(location.x, location.y);
 			},
 			_createNewDeclarationLayer: function () {	
 				const layer = new esri.layers.GraphicsLayer({
@@ -2227,12 +2229,20 @@ require(dojoConfig, [], function() {
 					this.editNewDeclarationLyrActive = !this.editNewDeclarationLyrActive;
 					if (this.editNewDeclarationLyrActive) {
 						this._editToolbar.activate(esri.toolbars.Edit.MOVE, evt.graphic);
+						this._editToolbar.on("graphic-move-stop", function (e) { 
+							const { graphic } = e;
+							this._updateNewDeclarationLocation(graphic.geometry.x, graphic.geometry.y);
+						}.bind(this));
 					} else {
 						this._editToolbar.deactivate();
 					}
 				}.bind(this));
 
 				return layer;
+			},
+			_updateNewDeclarationLocation(longitude, latitude){
+				this.DeclarationLongitude && this._contextObj.set( this.DeclarationLongitude, Number(longitude).toFixed(8) );
+				this.DeclarationLatitude  && this._contextObj.set( this.DeclarationLatitude,  Number(latitude).toFixed(8) );
 			}
 		});
 	});
