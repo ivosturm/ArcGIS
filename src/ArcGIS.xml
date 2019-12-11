@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <widget id="ArcGIS.widget.ArcGIS" needsEntityContext="false" xmlns="http://www.mendix.com/widget/1.0/">
-  <name>ArcGIS Widget</name>
+    <name>ArcGIS Widget</name>
     <description>ArcGIS Widget</description>
     <icon>
 
@@ -38,8 +38,8 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
 /wD/2Q==
 	
 	</icon>
-    <properties> 
-        <property key="objectEntity" type="entity" required="true" allowNonPersistableEntities="true" >
+    <properties>
+        <property key="objectEntity" type="entity" required="true" allowNonPersistableEntities="true">
             <caption>Object Entity</caption>
             <category>Data Source</category>
             <description>The entity of the ArcGIS Objects.</description>
@@ -47,17 +47,17 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
         <property key="xPathConstraint" type="entityConstraint" entityProperty="objectEntity" required="false">
             <caption>XPath Constraint</caption>
             <category>Data Source</category>
-            <description>(Not applicable when using Get Objects Microflow) The XPath constraint on the objects.</description> 
+            <description>(Not applicable when using Get Objects Microflow) The XPath constraint on the objects.</description>
         </property>
         <property key="objectIDAttr" type="attribute" entityProperty="objectEntity" required="true">
             <caption>Object ID</caption>
             <category>Data Source</category>
             <description>The unique ObjectID attribute of the GIS Object. Used for zooming behavior when dataview context object is an ArcGIS Object. Should corresponds with 'ArcGIS Identifier Name' setting.</description>
             <attributeTypes>
-                <attributeType name="Integer"/>
+                <attributeType name="Integer" />
             </attributeTypes>
         </property>
-        <property key="arcGISID" type="string" required="true"  defaultValue="objectid">
+        <property key="arcGISID" type="string" required="true" defaultValue="objectid">
             <caption>ArcGIS Identifier Name</caption>
             <category>Data Source</category>
             <description>The name of the GIS attribute to use for querying ArcGIS and retrieving objects. Default is 'OBJECTID'</description>
@@ -67,7 +67,7 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <category>Data Source</category>
             <description>The attribute to store the coordinates of the center of the GIS object in. Used especially for zooming in listen-to-grid scenario.</description>
             <attributeTypes>
-                <attributeType name="String"/>
+                <attributeType name="String" />
             </attributeTypes>
         </property>
         <property key="colorAttr" type="attribute" entityProperty="objectEntity" required="false">
@@ -75,7 +75,7 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <category>Data Source</category>
             <description>(Applicable on QueryLayer only) The attribute to use in the QueryLayer to overrule the color coming from ArcGIS. Comma separated RGB - 255,0,0 for red - is expected.</description>
             <attributeTypes>
-                <attributeType name="String"/>
+                <attributeType name="String" />
             </attributeTypes>
         </property>
         <property key="geometryTypeAttr" type="attribute" entityProperty="objectEntity" required="true">
@@ -83,7 +83,7 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <category>Data Source</category>
             <description>The attribute to store the geometry type in. This is used to query the correct ArcGIS layer if multiple layers with different Geometry Types are used.</description>
             <attributeTypes>
-                <attributeType name="Enum"/>
+                <attributeType name="Enum" />
             </attributeTypes>
         </property>
         <property key="baseMapURL_Default" type="string" required="false" defaultValue="https://services.arcgisonline.nl/arcgis/rest/services/Basiskaarten/Topo/MapServer">
@@ -100,86 +100,91 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <caption>Spatial Reference</caption>
             <category>Behavior</category>
             <description>The spatial reference of a map, layer, or inputs to and outputs from a task. Each projected and geographic coordinate system is defined by either a well-known ID (WKID) or a definition string (WKT). Note that versions prior to ArcGIS 10 only wkid was supported.  </description>
-        </property> 		
-		<property key="showAllObjectsInLayer" type="boolean" defaultValue="false">
+        </property>
+        <property key="showAllObjectsInLayer" type="boolean" defaultValue="false">
             <caption>Show All Objects</caption>
             <category>Appearance</category>
-            <description>When set to true all objects of the Layer will be shown. When set to false the widget will try only to plot only the objects that are retrieved by XPath, DataSource Microflow, or in case of a ListenToGrid, the Context DataGrid object.</description> 
-        </property>  		
-		<property key="enableLegend" type="boolean" defaultValue="true">
+            <description>When set to true all objects of the Layer will be shown. When set to false the widget will try only to plot only the objects that are retrieved by XPath, DataSource Microflow, or in case of a ListenToGrid, the Context DataGrid object.</description>
+        </property>
+        <property key="enableLegend" type="boolean" defaultValue="true">
             <caption>Enable Legend</caption>
             <category>Appearance</category>
-            <description>This decides whether a legend is available for the plotted layers. An extra menu-item will be added in the accordeon menu.</description> 
-        </property> 	
-		<property key="enableToggleLayers" type="boolean" defaultValue="true">
+            <description>This decides whether a legend is available for the plotted layers. An extra menu-item will be added in the accordeon menu.</description>
+        </property>
+        <property key="enableToggleLayers" type="boolean" defaultValue="true">
             <caption>Enable Toggling Layers</caption>
             <category>Appearance</category>
-            <description>This decides whether an end user will be available to toggle layer visibility. An extra menu-item will be added in the accordeon menu.</description> 
-        </property> 
-		<property key="enableSearch" type="boolean" defaultValue="true">
+            <description>This decides whether an end user will be available to toggle layer visibility. An extra menu-item will be added in the accordeon menu.</description>
+        </property>
+        <property key="enableSearch" type="boolean" defaultValue="true">
             <caption>Enable Search</caption>
             <category>Appearance</category>
-            <description>Whether a Search Bar will be added to the map to search for and zoom to a typed in address.</description> 
-        </property> 
-		<property key="startSubLayerListCollapsed" type="boolean" defaultValue="true">
+            <description>Whether a Search Bar will be added to the map to search for and zoom to a typed in address.</description>
+        </property>
+        <property key="startSubLayerListCollapsed" type="boolean" defaultValue="true">
             <caption>Start SublayerList Collapsed</caption>
             <category>Appearance</category>
-            <description>This decides whether the list of toggable visible sublayers opens on startup.</description> 
-        </property> 		
+            <description>This decides whether the list of toggable visible sublayers opens on startup.</description>
+        </property>
         <property key="mapHeight" type="integer" defaultValue="600">
             <caption>Height</caption>
             <category>Appearance</category>
-            <description>The map's height in pixels.</description> 
+            <description>The map's height in pixels.</description>
         </property>
         <property key="mapWidth" type="integer" defaultValue="900">
             <caption>Width</caption>
             <category>Appearance</category>
-            <description>The map's width in pixels.</description> 
+            <description>The map's width in pixels.</description>
         </property>
-		<property key="customColor" type="string" required="false" defaultValue="#FF0000">
+        <property key="customColor" type="string" required="false" defaultValue="#FF0000">
             <caption>Custom Color</caption>
             <category>Appearance</category>
             <description>The hexadecimal color which will be used for styling the border of the map and the hover on accordion menu with Layers and SubLayers.</description>
         </property>
-		<property key="selectedColor" type="string" required="false" defaultValue="#000000">
+        <property key="selectedColor" type="string" required="false" defaultValue="#000000">
             <caption>Selected Color</caption>
             <category>Appearance</category>
             <description>The hexadecimal color which will be used for the active pane in the right accordion menu.</description>
         </property>
+        <property key="centerOnLocation" type="boolean" defaultValue="true">
+            <caption>Center on Location</caption>
+            <category>Behavior</category>
+            <description>Enabling this option will make the map center on current location at start</description>
+        </property>
         <property key="defaultY" type="string" defaultValue="680000">
             <caption>Default Y</caption>
             <category>Behavior</category>
-            <description>Default Y value for the map to start at.</description> 
+            <description>Default Y value for the map to start at.</description>
         </property>
         <property key="defaultX" type="string" defaultValue="60000">
             <caption>Default X</caption>
             <category>Behavior</category>
-            <description>Default X for the map to start at.</description> 
+            <description>Default X for the map to start at.</description>
         </property>
         <property key="defaultZoom" type="integer" defaultValue="3">
             <caption>Default Zoom Level</caption>
             <category>Behavior</category>
-            <description>The zoom level used when displaying a map only.</description> 
+            <description>The zoom level used when displaying a map only.</description>
         </property>
         <property key="_singleObjectZoom" type="integer" defaultValue="6">
             <caption>Object Zoom Level</caption>
             <category>Behavior</category>
-            <description>The zoom level used when focussing on an object.</description> 
+            <description>The zoom level used when focussing on an object.</description>
         </property>
         <property key="layerArray" type="object" isList="true" required="false">
             <caption>Layer Definitions</caption>
             <category>Layer</category>
             <description>Add one or multiple layers to plot on the basemap.</description>
             <properties>
-				<property key="layerServerType" type="enumeration" required="true" defaultValue="MapServer">
-					<caption>Layer Server Type</caption>
-					<category>Layer</category>
-					<description>Determines which server type to use for the layers.</description>
-					<enumerationValues>
-						<enumerationValue key="MapServer">MapServer</enumerationValue>
-						<enumerationValue key="FeatureServer">FeatureServer</enumerationValue>
-					</enumerationValues>
-				</property>
+                <property key="layerServerType" type="enumeration" required="true" defaultValue="MapServer">
+                    <caption>Layer Server Type</caption>
+                    <category>Layer</category>
+                    <description>Determines which server type to use for the layers.</description>
+                    <enumerationValues>
+                        <enumerationValue key="MapServer">MapServer</enumerationValue>
+                        <enumerationValue key="FeatureServer">FeatureServer</enumerationValue>
+                    </enumerationValues>
+                </property>
                 <property key="layerURL" type="string">
                     <caption>Layer URL</caption>
                     <category>Layer</category>
@@ -190,93 +195,93 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
                     <category>Layer</category>
                     <description>The name of the layer to appear in the toggle layers pane.</description>
                 </property>
-				<property key="visibleLayerIndexes" type="string" required="false">
-					<caption>Visible Layer Indexes</caption>
-					<category>Layer</category>
-					<description>(MapLayer only) The indexes, concatenated and separated with a comma, of the Layers to show on the basemap. So, if you want to show layers 2 and 3, add 2, 3 here.</description>
-				</property>
-				<property key="startLayerTicked" type="boolean" required="true" defaultValue="true">
-					<caption>Start Layer Ticked</caption>
-					<category>Layer</category>
-					<description>If set to 'Yes' the layer starts with the layer ticked, hence visible.</description>
-				</property>
-				<property key="featureLayerID" type="string" required="false">
-					<caption>Feature Layer ID</caption>
-					<category>Layer</category>
-					<description>(FeatureLayer only) The ID of the FeatureLayer.</description>
-				</property>
-				<property key="queryLayer" type="boolean" required="true" defaultValue="false">
-					<caption>Query Layer</caption>
-					<category>Layer</category>
-					<description>(FeatureLayer only) Set this boolean to true to let the widget check this layer for retrieving the arcgis objects and setting the extent. Preferably set only 1 layer to Yes</description>
-				</property>
+                <property key="visibleLayerIndexes" type="string" required="false">
+                    <caption>Visible Layer Indexes</caption>
+                    <category>Layer</category>
+                    <description>(MapLayer only) The indexes, concatenated and separated with a comma, of the Layers to show on the basemap. So, if you want to show layers 2 and 3, add 2, 3 here.</description>
+                </property>
+                <property key="startLayerTicked" type="boolean" required="true" defaultValue="true">
+                    <caption>Start Layer Ticked</caption>
+                    <category>Layer</category>
+                    <description>If set to 'Yes' the layer starts with the layer ticked, hence visible.</description>
+                </property>
+                <property key="featureLayerID" type="string" required="false">
+                    <caption>Feature Layer ID</caption>
+                    <category>Layer</category>
+                    <description>(FeatureLayer only) The ID of the FeatureLayer.</description>
+                </property>
+                <property key="queryLayer" type="boolean" required="true" defaultValue="false">
+                    <caption>Query Layer</caption>
+                    <category>Layer</category>
+                    <description>(FeatureLayer only) Set this boolean to true to let the widget check this layer for retrieving the arcgis objects and setting the extent. Preferably set only 1 layer to Yes</description>
+                </property>
                 <property key="showAttribution" type="boolean" defaultValue="false">
                     <caption>Show Attribution</caption>
                     <category>Layer</category>
                     <description>Whether to show the attribution (who contributed to the map ESRI, Nasa, Kadaster, etc) of the Layer or not.</description>
                 </property>
-				<property key="opacity" type="string" required="false" defaultValue="1.0">
-					<caption>Layer Opacity</caption>
-					<category>Layer</category>
-					<description>(FeatureLayer only) Adjust the opacity of the objects plotted on the map. 1.0 is fully opaque, 0.0 is fully transparent. For polyons typically use 0.5.</description>
-				</property>
-				<property key="layerGeometryType" type="enumeration" required="true" defaultValue="point">
-					<caption>Layer Geometry Type</caption>
-					<category>Layer</category>
-					<description>Based on this attribute the correct Layer will be queried for pop-up information.</description>
-					<enumerationValues>
-						<enumerationValue key="point">point</enumerationValue>
-						<enumerationValue key="polyline">polyline</enumerationValue>
-						<enumerationValue key="polygon">polygon</enumerationValue>
-						<enumerationValue key="multipoint">multipoint</enumerationValue>
-					</enumerationValues>
-				</property>
+                <property key="opacity" type="string" required="false" defaultValue="1.0">
+                    <caption>Layer Opacity</caption>
+                    <category>Layer</category>
+                    <description>(FeatureLayer only) Adjust the opacity of the objects plotted on the map. 1.0 is fully opaque, 0.0 is fully transparent. For polyons typically use 0.5.</description>
+                </property>
+                <property key="layerGeometryType" type="enumeration" required="true" defaultValue="point">
+                    <caption>Layer Geometry Type</caption>
+                    <category>Layer</category>
+                    <description>Based on this attribute the correct Layer will be queried for pop-up information.</description>
+                    <enumerationValues>
+                        <enumerationValue key="point">point</enumerationValue>
+                        <enumerationValue key="polyline">polyline</enumerationValue>
+                        <enumerationValue key="polygon">polygon</enumerationValue>
+                        <enumerationValue key="multipoint">multipoint</enumerationValue>
+                    </enumerationValues>
+                </property>
             </properties>
         </property>
-		<property key="enableCustomStyling" type="boolean" defaultValue="false">
-			<caption>Enable Custom Styling</caption>
-			<category>Layer</category>
-			<description>(Only supported for point and polygon QueryLayers) Whether to overrule styling for the object in the layer which has 'Query Layer' set to 'Yes'.</description>
-		</property>	
+        <property key="enableCustomStyling" type="boolean" defaultValue="false">
+            <caption>Enable Custom Styling</caption>
+            <category>Layer</category>
+            <description>(Only supported for point and polygon QueryLayers) Whether to overrule styling for the object in the layer which has 'Query Layer' set to 'Yes'.</description>
+        </property>
         <property key="colorArray" type="object" isList="true" required="false">
             <caption>Color Labeling</caption>
             <category>Layer</category>
             <description>(QueryLayer only) Add labels to the different colors of the objects.</description>
             <properties>
-				<property key="featureColor" type="string" required="false" defaultValue="255,0,0">
-					<caption>Feature Color</caption>
-					<category>Layer</category>
-					<description>(QueryLayer only) the RGB color of the object as found in the Color Attribute.</description>
-				</property>
-				<property key="featureColorLabel" type="string" required="false" defaultValue="New Label">
-					<caption>Feature Label</caption>
-					<category>Layer</category>
-					<description>(QueryLayer only) The label for the symbol of this specific RGB color.</description>
-				</property>
+                <property key="featureColor" type="string" required="false" defaultValue="255,0,0">
+                    <caption>Feature Color</caption>
+                    <category>Layer</category>
+                    <description>(QueryLayer only) the RGB color of the object as found in the Color Attribute.</description>
+                </property>
+                <property key="featureColorLabel" type="string" required="false" defaultValue="New Label">
+                    <caption>Feature Label</caption>
+                    <category>Layer</category>
+                    <description>(QueryLayer only) The label for the symbol of this specific RGB color.</description>
+                </property>
             </properties>
         </property>
         <property key="defaultColor" type="string" required="false" defaultValue="0,100,255">
             <caption>Default Color</caption>
             <category>Layer</category>
-            <description>The default color for all objects in the Query Layer that are not stored in Mendix.</description> 
+            <description>The default color for all objects in the Query Layer that are not stored in Mendix.</description>
         </property>
         <property key="defaultLabel" type="string" required="false" defaultValue="Other">
             <caption>Default Label</caption>
             <category>Layer</category>
-            <description>The default label for all objects in the Query Layer that are not stored in Mendix.</description> 
+            <description>The default label for all objects in the Query Layer that are not stored in Mendix.</description>
         </property>
-		<property key="markerSymbol" type="enumeration" required="true" defaultValue="STYLE_CROSS">
-			<caption>Marker Symbol</caption>
-			<category>Layer</category>
-			<description>(QueryLayer only) Adjust the type of marker being placed on the map. Will overrule what is set in ArcGIS itself for the markers.</description>
-			<enumerationValues>
-				<enumerationValue key="STYLE_CIRCLE">Circle</enumerationValue>
-				<enumerationValue key="STYLE_CROSS">Cross</enumerationValue>
-				<enumerationValue key="STYLE_DIAMOND">Diamond</enumerationValue>
-				<enumerationValue key="STYLE_SQUARE">Square</enumerationValue>
-				<enumerationValue key="STYLE_X">Diagonal Cross</enumerationValue>
-			</enumerationValues>
-		</property>
+        <property key="markerSymbol" type="enumeration" required="true" defaultValue="STYLE_CROSS">
+            <caption>Marker Symbol</caption>
+            <category>Layer</category>
+            <description>(QueryLayer only) Adjust the type of marker being placed on the map. Will overrule what is set in ArcGIS itself for the markers.</description>
+            <enumerationValues>
+                <enumerationValue key="STYLE_CIRCLE">Circle</enumerationValue>
+                <enumerationValue key="STYLE_CROSS">Cross</enumerationValue>
+                <enumerationValue key="STYLE_DIAMOND">Diamond</enumerationValue>
+                <enumerationValue key="STYLE_SQUARE">Square</enumerationValue>
+                <enumerationValue key="STYLE_X">Diagonal Cross</enumerationValue>
+            </enumerationValues>
+        </property>
         <property key="attributesArray" type="object" isList="true" required="false">
             <caption>Attributes</caption>
             <category>Interaction</category>
@@ -308,24 +313,24 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
         <property key="onClickButttonLabel" type="string" required="false" defaultValue="Open">
             <caption>On Click Button Label</caption>
             <category>Interaction</category>
-            <description>The label of the button to appear in the infowindow.</description> 
+            <description>The label of the button to appear in the infowindow.</description>
         </property>
         <property key="onClickButttonClass" type="string" required="false" defaultValue="btn mx-button">
             <caption>On Click Button Class</caption>
             <category>Interaction</category>
-            <description>The classes on the button to appear in the infowindow. By default mendix default classes are added. Those can be stripped and/or your own class added.</description> 
+            <description>The classes on the button to appear in the infowindow. By default mendix default classes are added. Those can be stripped and/or your own class added.</description>
         </property>
         <property key="_getObjectsMF" type="microflow" required="false" defaultValue="" entityProperty="getObjectsMFEntity">
             <caption>Get Objects Microflow</caption>
             <category>Data Source</category>
             <description>Microflow to retrieve all objects which should be visible on the ArcGIS Map.</description>
-            <returnType type="Object" isList="true" entityProperty="objectEntity"/>
+            <returnType type="Object" isList="true" entityProperty="objectEntity" />
         </property>
-		<property key="getObjectsMFEntity" entityProperty="objectEntity" type="entity" required="false">
-			<caption>Get Objects Entity</caption>
-			<category>Data Source</category>
-			<description>The entity which will be used as inputparameter for Get Objects Microflow.</description>
-		</property>
+        <property key="getObjectsMFEntity" entityProperty="objectEntity" type="entity" required="false">
+            <caption>Get Objects Entity</caption>
+            <category>Data Source</category>
+            <description>The entity which will be used as inputparameter for Get Objects Microflow.</description>
+        </property>
         <property key="getHostNameMF" type="microflow" required="true" defaultValue="">
             <caption>Get HostName Microflow</caption>
             <category>Environment</category>
@@ -344,8 +349,7 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <category>Console</category>
             <description>For debugging purposes. 
 			
-			If set to true the widget will add a console.dir (whole object) and console.log (coordinates) for every object retrieved from the database. The results can be checked in the browser itself in the console tab.</description> 
+			If set to true the widget will add a console.dir (whole object) and console.log (coordinates) for every object retrieved from the database. The results can be checked in the browser itself in the console tab.</description>
         </property>
     </properties>
 </widget>
-
