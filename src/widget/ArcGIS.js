@@ -661,6 +661,12 @@ require(dojoConfig, [], function() {
 						this._layerAddResultsEventHandler(layers);
 					})
 				);
+				//Actions to be executed after the map has finished loading.
+				this._gisMap.on('load',
+					function () { 
+						this._initNewDeclaration();
+					}.bind(this)
+				);
 				
 				if (this._gpsLocation && this.centerOnLocation) {
 					this._zoomToLocation(
@@ -872,7 +878,6 @@ require(dojoConfig, [], function() {
 				this._setupEvents();
 
 				this._gisMap.addLayers(this.arcGisLayerArr);
-				this._initNewDeclaration();
 			},
 			_zoomToLocation: function(longitude, latitude, zoom, project = true) {
 				if (longitude !== 0 && latitude !== 0) {
@@ -2145,8 +2150,10 @@ require(dojoConfig, [], function() {
 
 			_getGPSLocation: async function (forceNewLocation = false) {
 				let gpsLocation = undefined;
-
-				if (!forceNewLocation && this.initalGpsLocation !== undefined) {
+				
+				if (this.initalGpsLocation === -1) {
+					return undefined;
+        		} if (!forceNewLocation && this.initalGpsLocation !== undefined) {
 					gpsLocation = this.initalGpsLocation;
 				} else if (navigator.geolocation) {
 					gpsLocation = await new Promise(function (resolve) {
@@ -2157,7 +2164,7 @@ require(dojoConfig, [], function() {
 									longitude: pos.coords.longitude
 								});
 							}, function () {
-								resolve(undefined);
+								resolve(-1);
 							}
 						);
 					}).then(result => result);
@@ -2185,17 +2192,17 @@ require(dojoConfig, [], function() {
 			_initNewDeclaration: async function () {
 				let location = undefined;				
 
-				if (gpslocation && this.centerOnLocation) {					
+				if (this.centerOnLocation && (await this._getGPSLocation())) {
 					const gpslocation = await this._getGPSLocation();
-					location = await this._projectPoint(
-						new esri.geometry.Point(gpslocation.longitude, gpslocation.latitude)
-					);
-				} else {
-					location = new esri.geometry.Point(
-						Number(this.DefaultX),
-						Number(this.defaultY),
-						new esri.SpatialReference({ wkid: Number(this.spatialReference) })
-					);
+						location = await this._projectPoint(
+							new esri.geometry.Point(gpslocation.longitude, gpslocation.latitude)
+						);
+					} else {
+						location = new esri.geometry.Point(
+							Number(this.DefaultX),
+							Number(this.defaultY),
+							new esri.SpatialReference({ wkid: Number(this.spatialReference) })
+						);
 				}
 				
 				const symbol = new esri.symbol.SimpleMarkerSymbol(
