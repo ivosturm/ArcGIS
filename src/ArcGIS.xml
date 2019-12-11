@@ -156,6 +156,22 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <category>Appearance</category>
             <description>The hexadecimal color which will be used for the active pane in the right accordion menu.</description>
         </property>
+        <property key="DeclarationLongitude" type="attribute" entityProperty="objectEntity" required="false">
+            <caption>Declaration longitude</caption>
+            <category>Data Source</category>
+            <description>The longitude of the declaration.</description>
+            <attributeTypes>
+                <attributeType name="Decimal" />
+            </attributeTypes>
+        </property>
+        <property key="DeclarationLatitude" type="attribute" entityProperty="objectEntity" required="false">
+            <caption>Declaration latitude</caption>
+            <category>Data Source</category>
+            <description>The latitude of the declaration</description>
+            <attributeTypes>
+                <attributeType name="Decimal" />
+            </attributeTypes>
+        </property>
         <property key="centerOnLocation" type="boolean" defaultValue="true">
             <caption>Center on Location</caption>
             <category>Behavior</category>
@@ -330,16 +346,11 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <category>Interaction</category>
             <description>The classes on the button to appear in the infowindow. By default mendix default classes are added. Those can be stripped and/or your own class added.</description>
         </property>
-        <property key="_getObjectsMF" type="microflow" required="false" defaultValue="" entityProperty="getObjectsMFEntity">
+        <property key="_getObjectsMF" type="microflow" required="false" defaultValue="">
             <caption>Get Objects Microflow</caption>
             <category>Data Source</category>
             <description>Microflow to retrieve all objects which should be visible on the ArcGIS Map.</description>
             <returnType type="Object" isList="true" entityProperty="objectEntity" />
-        </property>
-        <property key="getObjectsMFEntity" entityProperty="objectEntity" type="entity" required="false">
-            <caption>Get Objects Entity</caption>
-            <category>Data Source</category>
-            <description>The entity which will be used as inputparameter for Get Objects Microflow.</description>
         </property>
         <property key="getHostNameMF" type="microflow" required="true" defaultValue="">
             <caption>Get HostName Microflow</caption>
