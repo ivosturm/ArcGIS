@@ -872,6 +872,7 @@ require(dojoConfig, [], function() {
 				this._setupEvents();
 
 				this._gisMap.addLayers(this.arcGisLayerArr);
+				this._initNewDeclaration();
 			},
 			_zoomToLocation: function(longitude, latitude, zoom, project = true) {
 				if (longitude !== 0 && latitude !== 0) {
@@ -2167,7 +2168,42 @@ require(dojoConfig, [], function() {
 				}
 				
 				return gpsLocation;
-			},			
+			},
+			_projectPoint: async function (point) {
+				return await new Promise(function (resolve) {
+					this.geometryService.project(
+						[point],
+						new esri.SpatialReference({ wkid: Number(this.spatialReference) }),
+						function(projectedPoints) {
+							resolve(projectedPoints[0]);
+						}
+					);
+				}.bind(this))
+				.then(result => result);
+			},
+			
+			_initNewDeclaration: async function () {
+				const gpslocation = await this._getGPSLocation();
+				const location = await this._projectPoint(new esri.geometry.Point(gpslocation.longitude, gpslocation.latitude));
+				const symbol = new esri.symbol.SimpleMarkerSymbol(
+					{
+						"color": [255,0,0],
+						"size": 12,
+						"angle": -30,
+						"type": "esriSMS",
+						"style": "esriSMSCircle",
+						"outline": {
+							"color": [0,0,0],
+							"width": 1,
+							"type": "esriSLS",
+							"style": "esriSLSSolid"
+						}
+					}
+				);
+				
+				const graphic = new esri.Graphic(location, symbol);
+				this._gisMap.graphics.add(graphic);
+			}
 		});
 	});
 });
