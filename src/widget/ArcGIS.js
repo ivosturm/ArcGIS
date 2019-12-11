@@ -2203,21 +2203,13 @@ require(dojoConfig, [], function() {
 						);
 				}
 				
-				const symbol = new esri.symbol.SimpleMarkerSymbol(
-					{
-						"color": [255,0,0],
-						"size": 12,
-						"angle": -30,
-						"type": "esriSMS",
-						"style": "esriSMSCircle",
-						"outline": {
-							"color": [0,0,0],
-							"width": 1,
-							"type": "esriSLS",
-							"style": "esriSLSSolid"
-						}
-					}
-				);				
+				const symbol = new esri.symbol.SimpleMarkerSymbol({
+					color: new esri.Color(this.GPSColor1),
+					size: 12,
+					angle: -30,
+					type: "esriSMS",
+					style: "esriSMSCircle",
+				});				
 				const graphic = new esri.Graphic(location, symbol);
 				const layer = this._createNewDeclarationLayer();
 				layer.add(graphic);
