@@ -662,9 +662,12 @@ require(dojoConfig, [], function() {
 				);
 				//Actions to be executed after the map has finished loading.
 				this._gisMap.on('load',
-					function () { 
-						this._initNewDeclaration();
-					}.bind(this)
+					function () {
+                        // attach events to gismap and layer loading
+						this._setupEvents();
+						
+                        this._initNewDeclaration();
+                      }.bind(this)
 				);
 				
 				if (this._gpsLocation && this.centerOnLocation) {
@@ -872,9 +875,6 @@ require(dojoConfig, [], function() {
 						}
 					}
 				}
-
-				// attach events to gismap and layer loading
-				this._setupEvents();
 
 				this._gisMap.addLayers(this.arcGisLayerArr);
 			},
@@ -2189,8 +2189,7 @@ require(dojoConfig, [], function() {
 			},
 			
 			_initNewDeclaration: async function () {
-				let location = undefined;				
-
+				let location = undefined;	
 				if (this.centerOnLocation && (await this._getGPSLocation())) {
 					const gpslocation = await this._getGPSLocation();
 						location = await this._projectPoint(
@@ -2218,10 +2217,30 @@ require(dojoConfig, [], function() {
 							"style": "esriSLSSolid"
 						}
 					}
-				);
-				
+				);				
 				const graphic = new esri.Graphic(location, symbol);
-				this._gisMap.graphics.add(graphic);
+				const layer = this._createNewDeclarationLayer();
+				layer.add(graphic);
+
+				this._gisMap.addLayers([layer]);
+			},
+			_createNewDeclarationLayer: function () {	
+				const layer = new esri.layers.GraphicsLayer({
+					id: "newDeclarationLyr"
+				});
+				//click handlers
+				//Activate the toolbar when you click on a graphic
+				layer.on("click", function(evt) {
+					event.stop(evt);
+					this.editNewDeclarationLyrActive = !this.editNewDeclarationLyrActive;
+					if (this.editNewDeclarationLyrActive) {
+						this._editToolbar.activate(esri.toolbars.Edit.MOVE, evt.graphic);
+					} else {
+						this._editToolbar.deactivate();
+					}
+				}.bind(this));
+
+				return layer;
 			}
 		});
 	});
