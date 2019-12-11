@@ -2183,8 +2183,21 @@ require(dojoConfig, [], function() {
 			},
 			
 			_initNewDeclaration: async function () {
-				const gpslocation = await this._getGPSLocation();
-				const location = await this._projectPoint(new esri.geometry.Point(gpslocation.longitude, gpslocation.latitude));
+				let location = undefined;				
+
+				if (gpslocation && this.centerOnLocation) {					
+					const gpslocation = await this._getGPSLocation();
+					location = await this._projectPoint(
+						new esri.geometry.Point(gpslocation.longitude, gpslocation.latitude)
+					);
+				} else {
+					location = new esri.geometry.Point(
+						Number(this.DefaultX),
+						Number(this.defaultY),
+						new esri.SpatialReference({ wkid: Number(this.spatialReference) })
+					);
+				}
+				
 				const symbol = new esri.symbol.SimpleMarkerSymbol(
 					{
 						"color": [255,0,0],
