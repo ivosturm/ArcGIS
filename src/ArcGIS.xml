@@ -78,12 +78,34 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
                 <attributeType name="String" />
             </attributeTypes>
         </property>
+        <property key="_getObjectsMF" type="microflow" required="false" defaultValue="">
+            <caption>Get Objects Microflow</caption>
+            <category>Data Source</category>
+            <description>Microflow to retrieve all objects which should be visible on the ArcGIS Map.</description>
+            <returnType type="Object" isList="true" entityProperty="objectEntity" />
+        </property>
         <property key="geometryTypeAttr" type="attribute" entityProperty="objectEntity" required="true">
             <caption>Geometry Type</caption>
             <category>Data Source</category>
             <description>The attribute to store the geometry type in. This is used to query the correct ArcGIS layer if multiple layers with different Geometry Types are used.</description>
             <attributeTypes>
                 <attributeType name="Enum" />
+            </attributeTypes>
+        </property>
+        <property key="DeclarationLongitude" type="attribute" entityProperty="objectEntity" required="false">
+            <caption>Declaration longitude</caption>
+            <category>Data Source</category>
+            <description>The longitude of the declaration.</description>
+            <attributeTypes>
+                <attributeType name="Decimal" />
+            </attributeTypes>
+        </property>
+        <property key="DeclarationLatitude" type="attribute" entityProperty="objectEntity" required="false">
+            <caption>Declaration latitude</caption>
+            <category>Data Source</category>
+            <description>The latitude of the declaration</description>
+            <attributeTypes>
+                <attributeType name="Decimal" />
             </attributeTypes>
         </property>
         <property key="baseMapURL_Default" type="string" required="false" defaultValue="https://services.arcgisonline.nl/arcgis/rest/services/Basiskaarten/Topo/MapServer">
@@ -96,20 +118,35 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <category>Behavior</category>
             <description>The URL of the satellite base map to load.</description>
         </property>
-        <property key="GPSColor1" type="string" required="false" defaultValue="#b6061b">
-            <caption>Color icon 1</caption>
-            <category>Behavior</category>
-            <description>The color of the fist icon</description>
-        </property>
-        <property key="GPSColor2" type="string" required="false" defaultValue="#e8dd11">
-            <caption>Color icon 2</caption>
-            <category>Behavior</category>
-            <description>The color of the second icon</description>
-        </property>
         <property key="spatialReference" type="string" required="true" defaultValue="10210">
             <caption>Spatial Reference</caption>
             <category>Behavior</category>
             <description>The spatial reference of a map, layer, or inputs to and outputs from a task. Each projected and geographic coordinate system is defined by either a well-known ID (WKID) or a definition string (WKT). Note that versions prior to ArcGIS 10 only wkid was supported.  </description>
+        </property>
+        <property key="defaultX" type="string" defaultValue="60000">
+            <caption>Default X</caption>
+            <category>Behavior</category>
+            <description>Default X for the map to start at.</description>
+        </property>
+        <property key="defaultY" type="string" defaultValue="680000">
+            <caption>Default Y</caption>
+            <category>Behavior</category>
+            <description>Default Y value for the map to start at.</description>
+        </property>
+        <property key="defaultZoom" type="integer" defaultValue="3">
+            <caption>Default Zoom Level</caption>
+            <category>Behavior</category>
+            <description>The zoom level used when displaying a map only.</description>
+        </property>
+        <property key="_singleObjectZoom" type="integer" defaultValue="6">
+            <caption>Object Zoom Level</caption>
+            <category>Behavior</category>
+            <description>The zoom level used when focussing on an object.</description>
+        </property>
+        <property key="centerOnLocation" type="boolean" defaultValue="true">
+            <caption>Center on Location</caption>
+            <category>Behavior</category>
+            <description>Enabling this option will make the map center on current location at start</description>
         </property>
         <property key="showAllObjectsInLayer" type="boolean" defaultValue="false">
             <caption>Show All Objects</caption>
@@ -156,46 +193,15 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <category>Appearance</category>
             <description>The hexadecimal color which will be used for the active pane in the right accordion menu.</description>
         </property>
-        <property key="DeclarationLongitude" type="attribute" entityProperty="objectEntity" required="false">
-            <caption>Declaration longitude</caption>
-            <category>Data Source</category>
-            <description>The longitude of the declaration.</description>
-            <attributeTypes>
-                <attributeType name="Decimal" />
-            </attributeTypes>
+        <property key="currentLocationColor" type="string" required="false" defaultValue="#b6061b">
+            <caption>Color current location icon</caption>
+            <category>Appearance</category>
+            <description>The hexadecimal color of the current location icon</description>
         </property>
-        <property key="DeclarationLatitude" type="attribute" entityProperty="objectEntity" required="false">
-            <caption>Declaration latitude</caption>
-            <category>Data Source</category>
-            <description>The latitude of the declaration</description>
-            <attributeTypes>
-                <attributeType name="Decimal" />
-            </attributeTypes>
-        </property>
-        <property key="centerOnLocation" type="boolean" defaultValue="true">
-            <caption>Center on Location</caption>
-            <category>Behavior</category>
-            <description>Enabling this option will make the map center on current location at start</description>
-        </property>
-        <property key="defaultY" type="string" defaultValue="680000">
-            <caption>Default Y</caption>
-            <category>Behavior</category>
-            <description>Default Y value for the map to start at.</description>
-        </property>
-        <property key="defaultX" type="string" defaultValue="60000">
-            <caption>Default X</caption>
-            <category>Behavior</category>
-            <description>Default X for the map to start at.</description>
-        </property>
-        <property key="defaultZoom" type="integer" defaultValue="3">
-            <caption>Default Zoom Level</caption>
-            <category>Behavior</category>
-            <description>The zoom level used when displaying a map only.</description>
-        </property>
-        <property key="_singleObjectZoom" type="integer" defaultValue="6">
-            <caption>Object Zoom Level</caption>
-            <category>Behavior</category>
-            <description>The zoom level used when focussing on an object.</description>
+        <property key="reportedColor" type="string" required="false" defaultValue="#b6061b">
+            <caption>Color reports</caption>
+            <category>Appearance</category>
+            <description>The hexadecimal color of the icon for created reports</description>
         </property>
         <property key="layerArray" type="object" isList="true" required="false">
             <caption>Layer Definitions</caption>
@@ -345,12 +351,6 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <caption>On Click Button Class</caption>
             <category>Interaction</category>
             <description>The classes on the button to appear in the infowindow. By default mendix default classes are added. Those can be stripped and/or your own class added.</description>
-        </property>
-        <property key="_getObjectsMF" type="microflow" required="false" defaultValue="">
-            <caption>Get Objects Microflow</caption>
-            <category>Data Source</category>
-            <description>Microflow to retrieve all objects which should be visible on the ArcGIS Map.</description>
-            <returnType type="Object" isList="true" entityProperty="objectEntity" />
         </property>
         <property key="getHostNameMF" type="microflow" required="true" defaultValue="">
             <caption>Get HostName Microflow</caption>
