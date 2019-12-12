@@ -418,7 +418,7 @@ require(dojoConfig, [], function() {
 				}
 
 				this._contextObj = obj;
-
+				
 				this._resetSubscriptions();
 
 				// Widget configured variables
@@ -666,7 +666,8 @@ require(dojoConfig, [], function() {
                         // attach events to gismap and layer loading
 						this._setupEvents();
 						
-                        this._initNewDeclaration();
+						this._initNewDeclaration();
+						this._getDeclarationsData();
                       }.bind(this)
 				);
 				
@@ -1160,7 +1161,6 @@ require(dojoConfig, [], function() {
 								console.error(this._logNode + error.description);
 							})
 						},
-						this
 					);
 				}
 			},
@@ -1753,6 +1753,7 @@ require(dojoConfig, [], function() {
 				if (this.consoleLogging) {
 					console.log(this.id + "._getReferenceMxObjects");
 				}
+				
 				// Scenario 1: loading objects with XPath constraint
 				if (this.objectEntity && this.xPathConstraint) {
 					if (this.consoleLogging) {
@@ -2175,13 +2176,13 @@ require(dojoConfig, [], function() {
 				
 				return gpsLocation;
 			},
-			_projectPoint: async function (point) {
+			_projectPoint: async function (points) {
 				return await new Promise(function (resolve) {
 					this.geometryService.project(
-						[point],
+						points,
 						new esri.SpatialReference({ wkid: Number(this.spatialReference) }),
 						function(projectedPoints) {
-							resolve(projectedPoints[0]);
+							resolve(projectedPoints);
 						}
 					);
 				}.bind(this))
@@ -2193,14 +2194,15 @@ require(dojoConfig, [], function() {
 				if (this.centerOnLocation && (await this._getGPSLocation())) {
 					const gpslocation = await this._getGPSLocation();
 						location = await this._projectPoint(
-							new esri.geometry.Point(gpslocation.longitude, gpslocation.latitude)
+							[new esri.geometry.Point(gpslocation.longitude, gpslocation.latitude)]
 						);
-					} else {
-						location = new esri.geometry.Point(
-							Number(this.DefaultX),
-							Number(this.defaultY),
-							new esri.SpatialReference({ wkid: Number(this.spatialReference) })
-						);
+						location = location[0];
+				} else {
+					location = new esri.geometry.Point(
+						Number(this.DefaultX),
+						Number(this.defaultY),
+						new esri.SpatialReference({ wkid: Number(this.spatialReference) })
+					);
 				}				
 				
 				const symbol = new esri.symbol.SimpleMarkerSymbol({
@@ -2240,10 +2242,60 @@ require(dojoConfig, [], function() {
 
 				return layer;
 			},
+			_createExistingDeclarationsLayer: async function (declarationArr) {
+				
+				let layer = new esri.layers.GraphicsLayer({
+					id: "existingDeclarationsLyr"
+				});
+				
+				declarationArr.forEach(function (declaration) { 
+					const attributes = declaration.jsonData.attributes;
+					const location = new esri.geometry.Point({x :attributes.Longt.value, y: attributes.Lat.value,  "spatialReference" :new esri.SpatialReference({ wkid: Number(this.spatialReference) })});
+					const symbol = new esri.symbol.SimpleMarkerSymbol({
+						color: new esri.Color("#1e6b00"),
+						size: 5,
+						type: "esriSMS",
+						style: "esriSMSDiamond"
+					});
+					layer.add(esri.Graphic(location, symbol, attributes));
+				}.bind(this));
+				
+				
+				this._gisMap.addLayers([layer]);
+
+			},
 			_updateNewDeclarationLocation(longitude, latitude){
 				this.DeclarationLongitude && this._contextObj.set( this.DeclarationLongitude, Number(longitude).toFixed(8) );
 				this.DeclarationLatitude  && this._contextObj.set( this.DeclarationLatitude,  Number(latitude).toFixed(8) );
-			}
+			},
+			_getDeclarationsData: function () {
+				if (this.getReportsMF) {
+					
+					var guid = this._contextObj.getGuid();
+					mx.data.action({
+						params: {
+							applyto: "selection",
+							actionname: this.getReportsMF,
+							guids: [guid]
+						},
+						origin: this.mxform,
+						callback: lang.hitch(this, function(objs) {
+							if (this.consoleLogging) {
+								console.log(
+									this._logNode + "Received " + objs.length + " MxObjects: "
+								);
+								console.dir(this._logNode + objs);
+							}
+							this._createExistingDeclarationsLayer(objs);
+						}),
+						error: lang.hitch(this, function(error) {
+							console.error(this._logNode + error.description);
+						})
+					});
+					// if no other objects need to be loaded, just load the map, assuming the context entity is the object to load
+				}
+			},
+
 		});
 	});
 });
