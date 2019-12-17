@@ -2247,21 +2247,35 @@ require(dojoConfig, [], function() {
 					id: "existingDeclarationsLyr"
 				});
 				
-				declarationArr.forEach(function (declaration) { 
-					const attributes = declaration.jsonData.attributes;
-					const location = new esri.geometry.Point({x :attributes.Longt.value, y: attributes.Lat.value,  "spatialReference" :new esri.SpatialReference({ wkid: Number(this.spatialReference) })});
-					const symbol = new esri.symbol.SimpleMarkerSymbol({
-						color: new esri.Color("#1e6b00"),
-						size: 10,
-						type: "esriSMS",
-						style: "esriSMSDiamond"
-					});
-					layer.add(esri.Graphic(location, symbol, attributes));
-				}.bind(this));
+				declarationArr.forEach(
+					declaration => (this._addExistingDeclarationToLayer(declaration, layer))
+				);
 				
 				
 				this._gisMap.addLayers([layer]);
 
+			},
+			_addExistingDeclarationToLayer(declaration, layer) {
+				const attributes = declaration.jsonData.attributes;
+				const location = new esri.geometry.Point({x :attributes.Longt.value, y: attributes.Lat.value,  "spatialReference" :new esri.SpatialReference({ wkid: Number(this.spatialReference) })});
+				const color = this._getDeclarationColorForStatus(attributes.Status.value);
+				const symbol = new esri.symbol.SimpleMarkerSymbol({
+					color: new esri.Color(color),
+					size: 10,
+					type: "esriSMS",
+					style: "esriSMSDiamond"
+				});
+
+				layer.add(esri.Graphic(location, symbol, attributes));
+			},
+			_getDeclarationColorForStatus(status) {
+				const statusColor = this.statusColorList.find(statusColorObj => { 
+					return statusColorObj.statusLabel === status;
+				});
+
+				return statusColor
+					? statusColor.statusColor
+					: /* Default fallback color= */ "#1e6b00";
 			},
 			_updateNewDeclarationLocation(longitude, latitude){
 				this.DeclarationLongitude && this._contextObj.set( this.DeclarationLongitude, Number(longitude).toFixed(8) );
