@@ -2272,8 +2272,7 @@ require(dojoConfig, [], function() {
 								obj.get(this.objectIDAttr).toString() ===
 								graphic.attributes[this.objectIDAttr].value
 						);
-
-						this._execDeclarationClickMf(mxObj);
+						if (this.onReportClickMF) this._execDeclarationClickMf(mxObj);
 					}.bind(this)
 				);
 
