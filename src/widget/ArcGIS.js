@@ -2207,8 +2207,7 @@ require(dojoConfig, [], function() {
 				
 				const symbol = new esri.symbol.SimpleMarkerSymbol({
 					color: new esri.Color(this.currentLocationColor),
-					size: 12,
-					angle: -30,
+					size: 10,
 					type: "esriSMS",
 					style: "esriSMSCircle"
 				});				
@@ -2253,7 +2252,7 @@ require(dojoConfig, [], function() {
 					const location = new esri.geometry.Point({x :attributes.Longt.value, y: attributes.Lat.value,  "spatialReference" :new esri.SpatialReference({ wkid: Number(this.spatialReference) })});
 					const symbol = new esri.symbol.SimpleMarkerSymbol({
 						color: new esri.Color("#1e6b00"),
-						size: 5,
+						size: 10,
 						type: "esriSMS",
 						style: "esriSMSDiamond"
 					});
