@@ -2308,11 +2308,13 @@ require(dojoConfig, [], function() {
 				layer.add(esri.Graphic(location, symbol, attributes));
 			},
 			_getDeclarationColorForStatus(status) {
-				const statusColor = this.statusColorList.find(statusColorObj => statusColorObj.statusLabel.toUpperCase() === status.toUpperCase());
+				const fallbackColor = "#1e6b00";
+				if(!status){
+					return fallbackColor;;
+				}
+				const statusColor = this.statusColorList.find( statusColorObj => statusColorObj.statusLabel.toUpperCase() === status.toUpperCase() );
 
-				return statusColor
-					? statusColor.statusColor
-					: /* Default fallback color= */ "#1e6b00";
+				return statusColor ? statusColor.statusColor : fallbackColor;
 			},
 			_execDeclarationClickMf: function(mxobj) {
 				const guid = mxobj ? mxobj.getGuid() : null;
@@ -2323,6 +2325,25 @@ require(dojoConfig, [], function() {
 							params: {
 								applyto: "selection",
 								actionname: this.onReportClickMF,
+								guids: [guid]
+							},
+							origin: this.mxform,
+							error: function(error) {
+								console.debug(error.description);
+							}
+						},
+						this
+					);
+				}
+			},
+			_execNewReportChangekMf: function(){
+				const guid = this._contextObj.getGuid();
+				if(guid){
+					mx.data.action(
+						{
+							params: {
+								applyto: "selection",
+								actionname: this.onNewReportChangeMF,
 								guids: [guid]
 							},
 							origin: this.mxform,
@@ -2345,6 +2366,9 @@ require(dojoConfig, [], function() {
 						this.DeclarationLatitude,
 						Number(latitude).toFixed(8)
 					);
+
+				this.onNewReportChangeMF &&
+					this._execNewReportChangekMf();
 			},
 			_getDeclarationsData: function() {
 				if (this.getReportsMF) {
