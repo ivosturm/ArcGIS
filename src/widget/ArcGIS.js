@@ -2235,7 +2235,7 @@ require(dojoConfig, [], function() {
 
 				const symbol = new esri.symbol.SimpleMarkerSymbol({
 					color: new esri.Color(this.currentLocationColor),
-					size: 10,
+					size: 15,
 					type: "esriSMS",
 					style: "esriSMSCircle"
 				});
@@ -2320,7 +2320,7 @@ require(dojoConfig, [], function() {
 				);
 				const symbol = new esri.symbol.SimpleMarkerSymbol({
 					color: new esri.Color(color),
-					size: 10,
+					size: 15,
 					type: "esriSMS",
 					style: "esriSMSDiamond"
 				});
