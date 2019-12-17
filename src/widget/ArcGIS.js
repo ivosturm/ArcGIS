@@ -2289,8 +2289,8 @@ require(dojoConfig, [], function() {
 			_addExistingDeclarationToLayer(declaration, layer) {
 				const attributes = declaration.jsonData.attributes;
 				const location = new esri.geometry.Point({
-					x: attributes.Longt.value,
-					y: attributes.Lat.value,
+					x: attributes[this.DeclarationLongitude].value,
+					y: attributes[this.DeclarationLatitude].value,
 					spatialReference: new esri.SpatialReference({
 						wkid: Number(this.spatialReference)
 					})
