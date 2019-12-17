@@ -360,6 +360,12 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <description>Microflow that will be executed when you click on the infowindow button. Takes the entity of the Objects as input parameter</description>
             <returnType type="Void"></returnType>
         </property>
+        <property key="onReportClickMF" type="microflow" required="false" defaultValue="" entityProperty="objectEntity">
+            <caption>On Report Click Microflow</caption>
+            <category>Interaction</category>
+            <description>Microflow that will be executed when you click on a report. Takes the entity of the Objects as input parameter</description>
+            <returnType type="Void"></returnType>
+        </property>
         <property key="onClickButttonLabel" type="string" required="false" defaultValue="Open">
             <caption>On Click Button Label</caption>
             <category>Interaction</category>
