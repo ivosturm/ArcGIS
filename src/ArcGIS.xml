@@ -62,7 +62,7 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <category>Data Source</category>
             <description>The name of the GIS attribute to use for querying ArcGIS and retrieving objects. Default is 'OBJECTID'</description>
         </property>
-        <property key="centerAttr" type="attribute" entityProperty="objectEntity" required="true">
+        <property key="centerAttr" type="attribute" entityProperty="objectEntity" required="false">
             <caption>Center Coordinates</caption>
             <category>Data Source</category>
             <description>The attribute to store the coordinates of the center of the GIS object in. Used especially for zooming in listen-to-grid scenario.</description>
@@ -114,6 +114,14 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <description>Microflow to retrieve all created reports which should be visible on the ArcGIS Map.</description>
             <returnType type="Object" isList="true" entityProperty="objectEntity" />
         </property>
+        <property key="reportStatus" type="attribute" entityProperty="objectEntity" required="false">
+            <caption>Report Status</caption>
+            <category>Data Source</category>
+            <description>The attribute that represents the status of the report.</description>
+            <attributeTypes>
+                <attributeType name="Enum" />
+            </attributeTypes>
+        </property>
         <property key="baseMapURL_Default" type="string" required="false" defaultValue="https://services.arcgisonline.nl/arcgis/rest/services/Basiskaarten/Topo/MapServer">
             <caption>Base Default Map URL</caption>
             <category>Behavior</category>
@@ -143,6 +151,12 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <caption>Default Zoom Level</caption>
             <category>Behavior</category>
             <description>The zoom level used when displaying a map only.</description>
+        </property>
+        <property key="customZoomlevel" type="microflow" required="false" defaultValue="">
+            <caption>Custom zoom level</caption>
+            <category>Behavior</category>
+            <description>Create a microflow that returns a zoom level in an integer value</description>
+            <returnType type="Integer"></returnType>
         </property>
         <property key="_singleObjectZoom" type="integer" defaultValue="6">
             <caption>Object Zoom Level</caption>
@@ -364,6 +378,12 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <caption>On Report Click Microflow</caption>
             <category>Interaction</category>
             <description>Microflow that will be executed when you click on a report. Takes the entity of the Objects as input parameter</description>
+            <returnType type="Void"></returnType>
+        </property>
+        <property key="onNewReportChangeMF" type="microflow" required="false" defaultValue="" entityProperty="objectEntity">
+            <caption>On new Report changed Microflow</caption>
+            <category>Interaction</category>
+            <description>Microflow that will be executed when you change the location of the new report. Takes the entity of the Objects as input parameter</description>
             <returnType type="Void"></returnType>
         </property>
         <property key="onClickButttonLabel" type="string" required="false" defaultValue="Open">

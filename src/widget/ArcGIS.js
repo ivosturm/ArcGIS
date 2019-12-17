@@ -435,6 +435,10 @@ require(dojoConfig, [], function() {
 				// if no map available, so at initial load after postCreate, load map in callback of getHostName
 				if (!this._gisMap) {
 					this._getHostNameMF(callback);
+					if (this.customZoomlevel) {this._getCustomZoomLevelMF(); }
+					else{
+						this.zoomlevel = this.defaultZoom;
+					}
 				} // if map  already available, zoom to object if available. use coordinates if existing, else query ArcGIS to get coordinates
 				else if (this.objectid) {
 					this._referenceMxObjectsArr = [obj];
@@ -632,7 +636,7 @@ require(dojoConfig, [], function() {
 				}
 				this._gisMap = new esri.Map(this.mapContainer, {
 					basemap: "topo",
-					zoom: this.defaultZoom,
+					zoom: Number(this.zoomlevel),
 					sliderStyle: "small",
 					infoWindow: popup
 					//,extent : ext
@@ -676,13 +680,13 @@ require(dojoConfig, [], function() {
 					this._zoomToLocation(
 						Number(this._gpsLocation.longitude),
 						Number(this._gpsLocation.latitude),
-						this.defaultZoom
+						this.zoomlevel
 					);
 				} else {
 					this._zoomToLocation(
 						Number(this.DefaultX),
 						Number(this.defaultY),
-						this.defaultZoom,
+						this.zoomlevel,
 						false
 					);
 				}
@@ -1162,6 +1166,22 @@ require(dojoConfig, [], function() {
 						})
 					});
 				}
+			},
+			_getCustomZoomLevelMF: function(){
+				mx.data.action({
+					params: {
+						applyto: "none",
+						actionname: this.customZoomlevel
+					},
+					origin: this.mxform,
+					callback: lang.hitch(this, function(intResult) {
+						this.zoomlevel = intResult;
+					}),
+					error: lang.hitch(this, function(error) {
+						console.error(this._logNode + error.description);	
+						this.zoomlevel = this.defaultZoom;
+					})
+				});
 			},
 			_queryLayer: function(query, layerObj) {
 				if (this.consoleLogging) {
@@ -2166,6 +2186,10 @@ require(dojoConfig, [], function() {
 							},
 							function() {
 								resolve(-1);
+							},
+							{
+								timeout: 10000,
+								enableHighAccuracy: true
 							}
 						);
 					}).then(result => result);
@@ -2211,7 +2235,7 @@ require(dojoConfig, [], function() {
 
 				const symbol = new esri.symbol.SimpleMarkerSymbol({
 					color: new esri.Color(this.currentLocationColor),
-					size: 10,
+					size: 15,
 					type: "esriSMS",
 					style: "esriSMSCircle"
 				});
@@ -2285,18 +2309,18 @@ require(dojoConfig, [], function() {
 			_addExistingDeclarationToLayer(declaration, layer) {
 				const attributes = declaration.jsonData.attributes;
 				const location = new esri.geometry.Point({
-					x: attributes.Longt.value,
-					y: attributes.Lat.value,
+					x: attributes[this.DeclarationLongitude].value,
+					y: attributes[this.DeclarationLatitude].value,
 					spatialReference: new esri.SpatialReference({
 						wkid: Number(this.spatialReference)
 					})
 				});
 				const color = this._getDeclarationColorForStatus(
-					attributes.Status.value
+					attributes[this.reportStatus].value
 				);
 				const symbol = new esri.symbol.SimpleMarkerSymbol({
 					color: new esri.Color(color),
-					size: 10,
+					size: 15,
 					type: "esriSMS",
 					style: "esriSMSDiamond"
 				});
@@ -2304,11 +2328,13 @@ require(dojoConfig, [], function() {
 				layer.add(esri.Graphic(location, symbol, attributes));
 			},
 			_getDeclarationColorForStatus(status) {
-				const statusColor = this.statusColorList.find(statusColorObj => statusColorObj.statusLabel.toUpperCase() === status.toUpperCase());
+				const fallbackColor = "#1e6b00";
+				if(!status){
+					return fallbackColor;;
+				}
+				const statusColor = this.statusColorList.find( statusColorObj => statusColorObj.statusLabel.toUpperCase() === status.toUpperCase() );
 
-				return statusColor
-					? statusColor.statusColor
-					: /* Default fallback color= */ "#1e6b00";
+				return statusColor ? statusColor.statusColor : fallbackColor;
 			},
 			_execDeclarationClickMf: function(mxobj) {
 				const guid = mxobj ? mxobj.getGuid() : null;
@@ -2319,6 +2345,25 @@ require(dojoConfig, [], function() {
 							params: {
 								applyto: "selection",
 								actionname: this.onReportClickMF,
+								guids: [guid]
+							},
+							origin: this.mxform,
+							error: function(error) {
+								console.debug(error.description);
+							}
+						},
+						this
+					);
+				}
+			},
+			_execNewReportChangekMf: function(){
+				const guid = this._contextObj.getGuid();
+				if(guid){
+					mx.data.action(
+						{
+							params: {
+								applyto: "selection",
+								actionname: this.onNewReportChangeMF,
 								guids: [guid]
 							},
 							origin: this.mxform,
@@ -2341,6 +2386,9 @@ require(dojoConfig, [], function() {
 						this.DeclarationLatitude,
 						Number(latitude).toFixed(8)
 					);
+
+				this.onNewReportChangeMF &&
+					this._execNewReportChangekMf();
 			},
 			_getDeclarationsData: function() {
 				if (this.getReportsMF) {
