@@ -114,7 +114,7 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <description>Microflow to retrieve all created reports which should be visible on the ArcGIS Map.</description>
             <returnType type="Object" isList="true" entityProperty="objectEntity" />
         </property>
-        <property key="reportStatus" type="attribute" entityProperty="objectEntity" required="true">
+        <property key="reportStatus" type="attribute" entityProperty="objectEntity" required="false">
             <caption>Report Status</caption>
             <category>Data Source</category>
             <description>The attribute that represents the status of the report.</description>
@@ -156,7 +156,7 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <caption>Custom zoom level</caption>
             <category>Behavior</category>
             <description>Create a microflow that returns a zoom level in an integer value</description>
-            <returnType type="integer"/>
+            <returnType type="Integer"></returnType>
         </property>
         <property key="_singleObjectZoom" type="integer" defaultValue="6">
             <caption>Object Zoom Level</caption>
