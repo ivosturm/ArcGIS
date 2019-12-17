@@ -2166,6 +2166,10 @@ require(dojoConfig, [], function() {
 							},
 							function() {
 								resolve(-1);
+							},
+							{
+								timeout: 10000,
+								enableHighAccuracy: true
 							}
 						);
 					}).then(result => result);
