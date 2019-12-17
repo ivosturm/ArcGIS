@@ -418,7 +418,7 @@ require(dojoConfig, [], function() {
 				}
 
 				this._contextObj = obj;
-				
+
 				this._resetSubscriptions();
 
 				// Widget configured variables
@@ -480,7 +480,7 @@ require(dojoConfig, [], function() {
 				if (this.consoleLogging) {
 					console.log(this._logNode + "._loadMap");
 				}
-				
+
 				this._gpsLocation = await this._getGPSLocation();
 
 				//This specifies the symbols highlighting selected/queried objects
@@ -661,16 +661,17 @@ require(dojoConfig, [], function() {
 					})
 				);
 				//Actions to be executed after the map has finished loading.
-				this._gisMap.on('load',
-					function () {
-                        // attach events to gismap and layer loading
+				this._gisMap.on(
+					"load",
+					function() {
+						// attach events to gismap and layer loading
 						this._setupEvents();
-						
+
 						this._initNewDeclaration();
 						this._getDeclarationsData();
-                      }.bind(this)
+					}.bind(this)
 				);
-				
+
 				if (this._gpsLocation && this.centerOnLocation) {
 					this._zoomToLocation(
 						Number(this._gpsLocation.longitude),
@@ -683,7 +684,7 @@ require(dojoConfig, [], function() {
 						Number(this.defaultY),
 						this.defaultZoom,
 						false
-					)
+					);
 				}
 
 				var toggle = new esri.dijit.BasemapToggle(
@@ -881,18 +882,18 @@ require(dojoConfig, [], function() {
 			},
 			_zoomToLocation: function(longitude, latitude, zoom, project = true) {
 				if (longitude !== 0 && latitude !== 0) {
-					
-
 					if (project) {
 						const locationPt = new esri.geometry.Point(longitude, latitude);
 						this.geometryService.project(
 							[locationPt],
-							new esri.SpatialReference({ wkid: Number(this.spatialReference) }),
+							new esri.SpatialReference({
+								wkid: Number(this.spatialReference)
+							}),
 							function(projectedPoints) {
 								this._gisMap.centerAndZoom(projectedPoints[0], zoom);
 							}.bind(this)
 						);
-					} else {						
+					} else {
 						const locationPt = new esri.geometry.Point(
 							longitude,
 							latitude,
@@ -1122,46 +1123,44 @@ require(dojoConfig, [], function() {
 				// sometimes update is triggered twice on initial load of widget. do not want to trigger MF twice...
 				if (this.getHostNameMF && this._initialLoad) {
 					this._initialLoad = false;
-					mx.data.action(
-						{
-							params: {
-								applyto: "none",
-								actionname: this.getHostNameMF
-							},
-							origin: this.mxform,
-							callback: lang.hitch(this, function(stringResult) {
-								// set the hostname retrieved from the datasource MF
-								this.hostName = stringResult;
-
-								// if server needs to be dynamically set per layer, get server name
-								if (this.getFeatureServerNameMF) {
-									mx.data.action({
-										params: {
-											applyto: "none",
-											actionname: this.getFeatureServerNameMF
-										},
-										origin: this.mxform,
-										callback: lang.hitch(this, function(stringResult) {
-											this._layerName = stringResult;
-											// Can be a heavy function when having 100+ objects related to the DataView object
-											// The false boolean is implemented to distinguish between an update (true) and not.
-											this._getReferenceMxObjects(callback, false);
-										}),
-										error: lang.hitch(this, function(error) {
-											console.error(this._logNode + error.description);
-										})
-									});
-								} else {
-									// Can be a heavy function when having 100+ objects related to the DataView object
-									// The false boolean is implemented to distinguish between an update (true) and not.
-									this._getReferenceMxObjects(callback, false);
-								}
-							}),
-							error: lang.hitch(this, function(error) {
-								console.error(this._logNode + error.description);
-							})
+					mx.data.action({
+						params: {
+							applyto: "none",
+							actionname: this.getHostNameMF
 						},
-					);
+						origin: this.mxform,
+						callback: lang.hitch(this, function(stringResult) {
+							// set the hostname retrieved from the datasource MF
+							this.hostName = stringResult;
+
+							// if server needs to be dynamically set per layer, get server name
+							if (this.getFeatureServerNameMF) {
+								mx.data.action({
+									params: {
+										applyto: "none",
+										actionname: this.getFeatureServerNameMF
+									},
+									origin: this.mxform,
+									callback: lang.hitch(this, function(stringResult) {
+										this._layerName = stringResult;
+										// Can be a heavy function when having 100+ objects related to the DataView object
+										// The false boolean is implemented to distinguish between an update (true) and not.
+										this._getReferenceMxObjects(callback, false);
+									}),
+									error: lang.hitch(this, function(error) {
+										console.error(this._logNode + error.description);
+									})
+								});
+							} else {
+								// Can be a heavy function when having 100+ objects related to the DataView object
+								// The false boolean is implemented to distinguish between an update (true) and not.
+								this._getReferenceMxObjects(callback, false);
+							}
+						}),
+						error: lang.hitch(this, function(error) {
+							console.error(this._logNode + error.description);
+						})
+					});
 				}
 			},
 			_queryLayer: function(query, layerObj) {
@@ -1753,7 +1752,7 @@ require(dojoConfig, [], function() {
 				if (this.consoleLogging) {
 					console.log(this.id + "._getReferenceMxObjects");
 				}
-				
+
 				// Scenario 1: loading objects with XPath constraint
 				if (this.objectEntity && this.xPathConstraint) {
 					if (this.consoleLogging) {
@@ -2148,22 +2147,24 @@ require(dojoConfig, [], function() {
 				}
 			},
 
-			_getGPSLocation: async function (forceNewLocation = false) {
+			_getGPSLocation: async function(forceNewLocation = false) {
 				let gpsLocation = undefined;
-				
+
 				if (this.initalGpsLocation === -1) {
 					return undefined;
-        		} if (!forceNewLocation && this.initalGpsLocation !== undefined) {
+				}
+				if (!forceNewLocation && this.initalGpsLocation !== undefined) {
 					gpsLocation = this.initalGpsLocation;
 				} else if (navigator.geolocation) {
-					gpsLocation = await new Promise(function (resolve) {
+					gpsLocation = await new Promise(function(resolve) {
 						navigator.geolocation.getCurrentPosition(
-							function (pos) {
+							function(pos) {
 								resolve({
 									latitude: pos.coords.latitude,
 									longitude: pos.coords.longitude
 								});
-							}, function () {
+							},
+							function() {
 								resolve(-1);
 							}
 						);
@@ -2173,92 +2174,127 @@ require(dojoConfig, [], function() {
 				if (!this.initalGpsLocation) {
 					this.initalGpsLocation = gpsLocation;
 				}
-				
+
 				return gpsLocation;
 			},
-			_projectPoint: async function (points) {
-				return await new Promise(function (resolve) {
-					this.geometryService.project(
-						points,
-						new esri.SpatialReference({ wkid: Number(this.spatialReference) }),
-						function(projectedPoints) {
-							resolve(projectedPoints);
-						}
-					);
-				}.bind(this))
-				.then(result => result);
+			_projectPoint: async function(points) {
+				return await new Promise(
+					function(resolve) {
+						this.geometryService.project(
+							points,
+							new esri.SpatialReference({
+								wkid: Number(this.spatialReference)
+							}),
+							function(projectedPoints) {
+								resolve(projectedPoints);
+							}
+						);
+					}.bind(this)
+				).then(result => result);
 			},
-			
-			_initNewDeclaration: async function () {
-				let location = undefined;	
+
+			_initNewDeclaration: async function() {
+				let location = undefined;
 				if (this.centerOnLocation && (await this._getGPSLocation())) {
 					const gpslocation = await this._getGPSLocation();
-						location = await this._projectPoint(
-							[new esri.geometry.Point(gpslocation.longitude, gpslocation.latitude)]
-						);
-						location = location[0];
+					location = await this._projectPoint([
+						new esri.geometry.Point(gpslocation.longitude, gpslocation.latitude)
+					]);
+					location = location[0];
 				} else {
 					location = new esri.geometry.Point(
 						Number(this.DefaultX),
 						Number(this.defaultY),
 						new esri.SpatialReference({ wkid: Number(this.spatialReference) })
 					);
-				}				
-				
+				}
+
 				const symbol = new esri.symbol.SimpleMarkerSymbol({
 					color: new esri.Color(this.currentLocationColor),
 					size: 10,
 					type: "esriSMS",
 					style: "esriSMSCircle"
-				});				
+				});
 				const graphic = new esri.Graphic(location, symbol);
 				const layer = this._createNewDeclarationLayer();
 				layer.add(graphic);
 
 				this._gisMap.addLayers([layer]);
-				
+
 				this._updateNewDeclarationLocation(location.x, location.y);
 			},
-			_createNewDeclarationLayer: function () {	
+			_createNewDeclarationLayer: function() {
 				const layer = new esri.layers.GraphicsLayer({
 					id: "newDeclarationLyr"
 				});
 				//click handlers
 				//Activate the toolbar when you click on a graphic
-				layer.on("click", function(evt) {
-					event.stop(evt);
-					this.editNewDeclarationLyrActive = !this.editNewDeclarationLyrActive;
-					if (this.editNewDeclarationLyrActive) {
-						this._editToolbar.activate(esri.toolbars.Edit.MOVE, evt.graphic);
-						this._editToolbar.on("graphic-move-stop", function (e) { 
-							const { graphic } = e;
-							this._updateNewDeclarationLocation(graphic.geometry.x, graphic.geometry.y);
-						}.bind(this));
-					} else {
-						this._editToolbar.deactivate();
-					}
-				}.bind(this));
+				layer.on(
+					"click",
+					function(evt) {
+						event.stop(evt);
+						this.editNewDeclarationLyrActive = !this
+							.editNewDeclarationLyrActive;
+						if (this.editNewDeclarationLyrActive) {
+							this._editToolbar.activate(esri.toolbars.Edit.MOVE, evt.graphic);
+							this._editToolbar.on(
+								"graphic-move-stop",
+								function(e) {
+									const { graphic } = e;
+									this._updateNewDeclarationLocation(
+										graphic.geometry.x,
+										graphic.geometry.y
+									);
+								}.bind(this)
+							);
+						} else {
+							this._editToolbar.deactivate();
+						}
+					}.bind(this)
+				);
 
 				return layer;
 			},
-			_createExistingDeclarationsLayer: async function (declarationArr) {
-				
+			_createExistingDeclarationsLayer: async function(declarationArr) {
 				let layer = new esri.layers.GraphicsLayer({
 					id: "existingDeclarationsLyr"
 				});
-				
-				declarationArr.forEach(
-					declaration => (this._addExistingDeclarationToLayer(declaration, layer))
-				);
-				
-				
-				this._gisMap.addLayers([layer]);
 
+				//click handlers
+				//Activate the toolbar when you click on a graphic
+				layer.on(
+					"click",
+					function(evt) {
+						event.stop(evt);
+						const { graphic } = evt;
+						const mxObj = declarationArr.find(
+							obj =>
+								obj.get(this.objectIDAttr).toString() ===
+								graphic.attributes[this.objectIDAttr].value
+						);
+
+						this._execDeclarationClickMf(mxObj);
+					}.bind(this)
+				);
+
+				declarationArr.forEach(declaration =>
+					this._addExistingDeclarationToLayer(declaration, layer)
+				);
+
+				this._gisMap.addLayers([layer]);
 			},
 			_addExistingDeclarationToLayer(declaration, layer) {
 				const attributes = declaration.jsonData.attributes;
-				const location = new esri.geometry.Point({x :attributes.Longt.value, y: attributes.Lat.value,  "spatialReference" :new esri.SpatialReference({ wkid: Number(this.spatialReference) })});
-				const color = this._getDeclarationColorForStatus(attributes.Status.value);
+				const location = new esri.geometry.Point({
+					x: attributes.Longt.value,
+					y: attributes.Lat.value,
+					spatialReference: new esri.SpatialReference({
+						wkid: Number(this.spatialReference)
+					})
+				});
+				const color = this._getDeclarationColorForStatus(
+					attributes.Status.value
+				);
 				const symbol = new esri.symbol.SimpleMarkerSymbol({
 					color: new esri.Color(color),
 					size: 10,
@@ -2275,13 +2311,40 @@ require(dojoConfig, [], function() {
 					? statusColor.statusColor
 					: /* Default fallback color= */ "#1e6b00";
 			},
-			_updateNewDeclarationLocation(longitude, latitude){
-				this.DeclarationLongitude && this._contextObj.set( this.DeclarationLongitude, Number(longitude).toFixed(8) );
-				this.DeclarationLatitude  && this._contextObj.set( this.DeclarationLatitude,  Number(latitude).toFixed(8) );
+			_execDeclarationClickMf: function(mxobj) {
+				const guid = mxobj ? mxobj.getGuid() : null;
+
+				if (guid) {
+					mx.data.action(
+						{
+							params: {
+								applyto: "selection",
+								actionname: this.onReportClickMF,
+								guids: [guid]
+							},
+							origin: this.mxform,
+							error: function(error) {
+								console.debug(error.description);
+							}
+						},
+						this
+					);
+				}
 			},
-			_getDeclarationsData: function () {
+			_updateNewDeclarationLocation(longitude, latitude) {
+				this.DeclarationLongitude &&
+					this._contextObj.set(
+						this.DeclarationLongitude,
+						Number(longitude).toFixed(8)
+					);
+				this.DeclarationLatitude &&
+					this._contextObj.set(
+						this.DeclarationLatitude,
+						Number(latitude).toFixed(8)
+					);
+			},
+			_getDeclarationsData: function() {
 				if (this.getReportsMF) {
-					
 					var guid = this._contextObj.getGuid();
 					mx.data.action({
 						params: {
@@ -2305,8 +2368,7 @@ require(dojoConfig, [], function() {
 					});
 					// if no other objects need to be loaded, just load the map, assuming the context entity is the object to load
 				}
-			},
-
+			}
 		});
 	});
 });
