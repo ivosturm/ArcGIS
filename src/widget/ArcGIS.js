@@ -2304,9 +2304,7 @@ require(dojoConfig, [], function() {
 				layer.add(esri.Graphic(location, symbol, attributes));
 			},
 			_getDeclarationColorForStatus(status) {
-				const statusColor = this.statusColorList.find(statusColorObj => {
-					return statusColorObj.statusLabel === status;
-				});
+				const statusColor = this.statusColorList.find(statusColorObj => statusColorObj.statusLabel.toUpperCase() === status.toUpperCase());
 
 				return statusColor
 					? statusColor.statusColor
