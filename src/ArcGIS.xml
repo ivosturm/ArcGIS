@@ -204,10 +204,22 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <category>Appearance</category>
             <description>The hexadecimal color of the current location icon</description>
         </property>
-        <property key="reportedColor" type="string" required="false" defaultValue="#b6061b">
-            <caption>Color reports</caption>
+        <property key="statusColorList" type="object" isList="true" required="false">
+            <caption>Status colors</caption>
             <category>Appearance</category>
-            <description>The hexadecimal color of the icon for created reports</description>
+            <description>Define colors for report status.</description>
+            <properties>
+                <property key="statusColor" type="string" required="false" defaultValue="255,0,0">
+                    <caption>Status Color</caption>
+                    <category>Layer</category>
+                    <description>The RGB color of the status icon.</description>
+                </property>
+                <property key="statusLabel" type="string" required="false" defaultValue="New Label">
+                    <caption>Status Label</caption>
+                    <category>Layer</category>
+                    <description>The label of the status.</description>
+                </property>
+            </properties>
         </property>
         <property key="layerArray" type="object" isList="true" required="false">
             <caption>Layer Definitions</caption>
