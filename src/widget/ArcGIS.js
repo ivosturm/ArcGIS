@@ -1388,8 +1388,10 @@ require(dojoConfig, [], function() {
 				);
 
 				// set default placeholder text. Somehow this is not working when setting property before startup.
-				dojo.query(".searchInputGroup input")[0].placeholder =
-					"Zoek adres of plaats";
+				const searchIpt = dojo.query(".searchInputGroup input");
+				if(searchIpt && searchIpt[0]){
+					searchIpt[0].placeholder = "Zoek adres of plaats";
+				}
 			},
 			_layerAddResultsEventHandler: function(layers) {
 				// set extent if a queryDefinition is given and a layer to be queried on is known
