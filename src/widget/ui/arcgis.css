@@ -1,0 +1,52 @@
+﻿
+@import url("ArcGIS/widget/ui/navButtons.css");
+@import url("https://js.arcgis.com/3.31/esri/css/esri.css");
+@import url("https://js.arcgis.com/3.31/dijit/themes/claro/claro.css");
+
+html, body {
+height: 100%;
+width: 100%;
+margin: 0;
+padding: 0;
+overflow:hidden;
+}
+#topPane {
+	border:solid 2px #462d44;
+	background:#fff;
+	color:#444;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	font-family: sans-serif;
+	font-size: 1.1em;
+	padding-left:20px;
+}
+#mapDiv {
+	padding:1px;
+	border:solid 2px #444;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+}
+#rightPane {
+	border:none;
+	padding: 0;
+	width:228px;
+}
+
+.BasemapToggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 50;
+}
+
+.arcgisSearch {
+	 display: block;
+	 position: absolute;
+	 z-index: 2;
+	 top: 20px;
+	 left: 74px;
+  }
+	
+.templatePicker {
+	border: solid 2px #444;
+}

@@ -1,4 +1,0 @@
-// All material copyright ESRI, All Rights Reserved, unless otherwise specified.
-// See http://js.arcgis.com/3.20/esri/copyright.txt for details.
-// 20180615 - commented the check on IsAsync. In Mendix 7 this check resulted in the API not loading. This is wat is different between Mendix 6 and 7, on Mendix 6 the isAsync is false so the extend_esri will be set. For Mendix 7, isAsync is true so extend_esri is not set.
-define("esri/kernel",["dojo/_base/kernel","dojo/_base/config","dojo/has"],function(e,f,g){var d=function(){return this}(),a=d.location,b=a.pathname,c=a.protocol,a={version:"3.20",_appBaseUrl:c+"//"+a.host+b.substring(0,b.lastIndexOf(b.split("/")[b.split("/").length-1]))};f.noGlobals||(d.esri=a);/*e.isAsync||*/g.add("extend-esri",1);(a.dijit=a.dijit||{})._arcgisUrl=("http:"===c||"https:"===c?c:"http:")+"//www.arcgis.com/sharing/rest";return a});
