@@ -57,25 +57,15 @@
 var dojoConfig = {
 	async: false,
 	locale: "en",
-	packages: [
-		// Any references to a "demo" resource should load modules locally, *not* from CDN
-		{
-			name: "esri",
-			location: "https://js.arcgis.com/3.31/esri"
-		},
-		{
-			name: "dojox",
-			location: "https://js.arcgis.com/3.31/dojox"
-		},
-		{
-			name: "moment",
-			location: "https://js.arcgis.com/3.31/moment"
-		},
-		{
-			name: "eDojo",
-			location: "https://js.arcgis.com/3.31/dojo"
-		}
-	]
+	paths: {
+		react: "https://cdnjs.cloudflare.com/ajax/libs/react/15.5.4/react.min",
+		"react-dom": "https://cdnjs.cloudflare.com/ajax/libs/react/15.5.4/react-dom.min",
+		openlayers: "https://cdnjs.cloudflare.com/ajax/libs/ol3/4.1.0/ol",
+		dojox: "https://js.arcgis.com/3.31/dojox",
+		esri: "https://js.arcgis.com/3.31/esri",
+		moment: "https://js.arcgis.com/3.31/moment",
+		eDojo : "https://js.arcgis.com/3.31/dojo"
+	}
 };
 
 require(dojoConfig, [], function() {
