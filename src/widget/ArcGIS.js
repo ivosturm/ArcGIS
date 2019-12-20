@@ -53,6 +53,7 @@
 	- Authentication
 		
 */
+
 var dojoConfig = {
 	async: false,
 	locale: "en",
@@ -80,6 +81,7 @@ var dojoConfig = {
 require(dojoConfig, [], function() {
 	return define("ArcGIS/widget/ArcGIS", [
 		/*~♦~♦ Dojo ♦~♦~*/
+		"eDojo/global",
 		"dojo/_base/declare",
 		"dojo/_base/array",
 		"dojo/_base/event",
@@ -147,9 +149,9 @@ require(dojoConfig, [], function() {
 		"dojox/gfx/Mover",
 		"dojox/gfx/_base",
 		"dojox/gfx/matrix",
-		"moment/moment",
-		"eDojo/global"
+		"moment/moment"
 	], function(
+		global,
 		declare,
 		arrayUtils,
 		event,
