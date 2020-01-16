@@ -512,7 +512,7 @@ require(dojoConfig, [], function() {
 						// attach events to gismap and layer loading
 						this._setupEvents();
 
-						this._initNewDeclaration();
+						if( this.enableNewReportCreation ) { this._initNewDeclaration(); }
 						this._getDeclarationsData();
 					}.bind(this)
 				);

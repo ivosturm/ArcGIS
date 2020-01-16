@@ -373,6 +373,11 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
                 </property>
             </properties>
         </property>
+         <property key="enableNewReportCreation" type="boolean" defaultValue="true">
+            <caption>Enable new report</caption>
+            <category>Interaction</category>
+            <description>Enables the option to create a new report.</description>
+        </property>
         <property key="onClickMF" type="microflow" required="false" defaultValue="" entityProperty="objectEntity">
             <caption>On Click Microflow</caption>
             <category>Interaction</category>
