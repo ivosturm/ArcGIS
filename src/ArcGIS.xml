@@ -158,6 +158,11 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
             <description>Create a microflow that returns a zoom level in an integer value</description>
             <returnType type="Integer"></returnType>
         </property>
+        <property key="zoomToFit" type="boolean" defaultValue="false">
+            <caption>Zoom to fit</caption>
+            <category>Behavior</category>
+            <description>Enabling this option will make the map zoom to fit thr result of the "Get reports microflow".</description>
+        </property>
         <property key="_singleObjectZoom" type="integer" defaultValue="6">
             <caption>Object Zoom Level</caption>
             <category>Behavior</category>
