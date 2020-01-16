@@ -2277,10 +2277,10 @@ require(dojoConfig, [], function() {
 				const points = declarationMFResult.map(declaration => {
 					const attributes = declaration.jsonData.attributes;
 
-					return new esri.geometry.Point({
+					return new Point({
 						x: attributes[this.DeclarationLongitude].value,
 						y: attributes[this.DeclarationLatitude].value,
-						spatialReference: new esri.SpatialReference({
+						spatialReference: new SpatialReference({
 							wkid: Number(this.spatialReference)
 						})
 					});
