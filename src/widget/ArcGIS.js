@@ -888,7 +888,11 @@ require(dojoConfig, [], function() {
 				this._gisMap.addLayers(this.arcGisLayerArr);
 			},
 			_zoomToLocation: function(longitude, latitude, zoom, project = true) {
-				if (longitude !== 0 && latitude !== 0) {
+				if ( 
+					!this.declarationsExtent
+					 && longitude !== 0 
+					 && latitude  !== 0
+				){
 					if (project) {
 						const locationPt = new esri.geometry.Point(longitude, latitude);
 						this.geometryService.project(
@@ -897,7 +901,9 @@ require(dojoConfig, [], function() {
 								wkid: Number(this.spatialReference)
 							}),
 							function(projectedPoints) {
-								this._gisMap.centerAndZoom(projectedPoints[0], zoom);
+								if (!this.declarationsExtent){/* check again, because this is async */
+									this._gisMap.centerAndZoom(projectedPoints[0], zoom);
+								}
 							}.bind(this)
 						);
 					} else {
@@ -2424,7 +2430,7 @@ require(dojoConfig, [], function() {
 							if (this.zoomToFit) {
 								this._zoomToFitDeclarations(objs);
 							} else {
-								this.zoomFitLevel = undefined;
+								this.declarationsExtent = undefined;
 							}
 
 							this._createExistingDeclarationsLayer(objs);
@@ -2455,6 +2461,7 @@ require(dojoConfig, [], function() {
 						this._gisMap.setExtent(this.declarationsExtent);
 					},
 					/*errback=*/ err => {
+						this.declarationsExtent = undefined;
 						if (this.consoleLogging) {
 							console.log("Something went wrong during the convex hull calculation of the reports.");
 							console.log(JSON.stringify(err));
