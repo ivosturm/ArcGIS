@@ -2339,10 +2339,13 @@ require(dojoConfig, [], function() {
 			},
 			_getDeclarationColorForStatus(status) {
 				const fallbackColor = "#1e6b00";
-				if(!status){
-					return fallbackColor;;
+				if (!status) {
+					return fallbackColor;
 				}
-				const statusColor = this.statusColorList.find( statusColorObj => statusColorObj.statusLabel.toUpperCase() === status.toUpperCase() );
+				const statusColor = this.statusColorList.find(
+					statusColorObj =>
+						statusColorObj.statusLabel.toUpperCase() === status.toUpperCase()
+				);
 
 				return statusColor ? statusColor.statusColor : fallbackColor;
 			},
@@ -2366,7 +2369,7 @@ require(dojoConfig, [], function() {
 					);
 				}
 			},
-			_execNewReportChangekMf: function(){
+			_execNewReportChangekMf: function() {
 				const guid = this._contextObj.getGuid();
 				if (guid) {
 					mx.data.action(
@@ -2397,9 +2400,8 @@ require(dojoConfig, [], function() {
 							this.DeclarationLatitude,
 							Number(latitude).toFixed(8)
 						);
-
-					this.onNewReportChangeMF && this._execNewReportChangekMf();
-				}
+          
+			    this.onNewReportChangeMF && this._execNewReportChangekMf();
 			},
 			_getDeclarationsData: function() {
 				if (this.getReportsMF) {
@@ -2418,6 +2420,13 @@ require(dojoConfig, [], function() {
 								);
 								console.dir(this._logNode + objs);
 							}
+
+							if (this.zoomToFit) {
+								this._zoomToFitDeclarations(objs);
+							} else {
+								this.zoomFitLevel = undefined;
+							}
+
 							this._createExistingDeclarationsLayer(objs);
 						}),
 						error: lang.hitch(this, function(error) {
@@ -2426,6 +2435,32 @@ require(dojoConfig, [], function() {
 					});
 					// if no other objects need to be loaded, just load the map, assuming the context entity is the object to load
 				}
+			},
+			_zoomToFitDeclarations: function(declarationMFResult) {
+				const points = declarationMFResult.map(declaration => {
+					const attributes = declaration.jsonData.attributes;
+
+					return new esri.geometry.Point({
+						x: attributes[this.DeclarationLongitude].value,
+						y: attributes[this.DeclarationLatitude].value,
+						spatialReference: new esri.SpatialReference({
+							wkid: Number(this.spatialReference)
+						})
+					});
+				});
+
+				this.geometryService.convexHull(points,
+					/*callback=*/geometry => {
+						this.declarationsExtent = geometry.getExtent();
+						this._gisMap.setExtent(this.declarationsExtent);
+					},
+					/*errback=*/ err => {
+						if (this.consoleLogging) {
+							console.log("Something went wrong during the convex hull calculation of the reports.");
+							console.log(JSON.stringify(err));
+						}
+					}
+				);
 			}
 		});
 	});
