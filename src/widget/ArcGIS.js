@@ -198,7 +198,6 @@ require(dojoConfig, [], function() {
 			_handle: null,
 			_contextObj: null,
 			_gisMap: null,
-			_defaultPosition: null,
 			_logNode: "ArcGIS Widget: ",
 			visibleLayerIds: [],
 			legendLayers: [],
@@ -263,9 +262,6 @@ require(dojoConfig, [], function() {
 				this._resetSubscriptions();
 
 				// Widget configured variables
-				this.objectid = this._contextObj
-					? this._contextObj.get(this.objectIDAttr)
-					: null;
 				this.centerCoordinates = this._contextObj
 					? this._contextObj.get(this.centerAttr)
 					: null;
@@ -281,13 +277,9 @@ require(dojoConfig, [], function() {
 					} else {
 						this.zoomlevel = this.defaultZoom;
 					}
-				} // if map  already available, zoom to object if available. use coordinates if existing, else query ArcGIS to get coordinates
-				else if (this.objectid) {
+				} else {
 					this._referenceMxObjectsArr = [obj];
 					this._refreshMap();
-				} else {
-					// if no object exists, zoom out to Default Zoom Level and Default X, Y
-					this.zoomRow();
 				}
 				callback();
 			},
@@ -1246,22 +1238,6 @@ require(dojoConfig, [], function() {
 				}
 			},
 			_layerAddResultsEventHandler: function(layers) {
-				// set extent if a queryDefinition is given and a layer to be queried on is known
-				if (this._queryLayerObj && this._queryDefinition) {
-					this._getExtentFromQueryDef(
-						this._queryLayerObj,
-						this._queryDefinition
-					);
-				} else if (this.objectid) {
-					this.zoomRow(
-						this.objectid,
-						this.centerCoordinates,
-						this.geometryType
-					);
-				} else {
-					this.zoomRow();
-				}
-
 				if (this.enableLegend) {
 					// add the legend
 					var legend = new Legend(
@@ -1459,66 +1435,7 @@ require(dojoConfig, [], function() {
 					}
 				}
 			},
-			zoomRow: function(id, centerCoordinates, geometryType) {
-				if (this.consoleLogging) {
-					console.log(this.id + ".zoomRow");
-					console.log(this._logNode + id);
-					console.log(this._logNode + centerCoordinates);
-					console.log(this._logNode + geometryType);
-				}
-
-				if (id) {
-					const spatialRef = this._gisMap.spatialReference;
-
-					if (centerCoordinates) {
-						const centerArray = centerCoordinates.split(",");
-						const centerX = Number(centerArray[0]);
-						const centerY = Number(centerArray[1]);
-						const centerLocation = new Point(centerX, centerY, spatialRef);
-
-						this._gisMap.centerAndZoom(
-							centerLocation,
-							Number(this._singleObjectZoom) - 1
-						);
-					} else {
-						let q = new Query();
-						q.outSpatialReference = spatialRef;
-						q.returnGeometry = true;
-						q.outFields = this.queryOutFieldsArr;
-
-						// add where statement based on unique identifier name from MendixObj
-						q.where = this.arcGISID + "=" + id;
-
-						// get correct layer from layercache based on geometryType.
-						const layerObj = this.layerArr.filter(
-							lang.hitch(this, function(layer) {
-								return layer.geometryType == geometryType;
-							})
-						)[0];
-
-						if (layerObj) {
-							this._queryLayer(q, layerObj);
-						} else {
-							console.error(
-								this._logNode +
-									"For zooming a layerObj is needed. This was not found. Do all Layers have the correct geometryType defined in the Modeler?"
-							);
-						}
-					}
-				}
-				// no actual objectid is given for zooming
-				else {
-					// zoom to defaultposition with default zoom level
-					this._gisMap.centerAndZoom(
-						this._defaultPosition,
-						Number(this.defaultZoom) - 1
-					);
-				}
-			},
 			containsObject: function(obj, list) {
-				if (this.consoleLogging) {
-					console.log(this.id + ".zoomRow");
-				}
 				var i;
 				for (i = 0; i < list.length; i++) {
 					if (list[i] == obj) {
