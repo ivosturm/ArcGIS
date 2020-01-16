@@ -2400,7 +2400,7 @@ require(dojoConfig, [], function() {
 							this.DeclarationLatitude,
 							Number(latitude).toFixed(8)
 						);
-          
+				}
 			    this.onNewReportChangeMF && this._execNewReportChangekMf();
 			},
 			_getDeclarationsData: function() {
