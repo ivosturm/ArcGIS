@@ -2416,7 +2416,7 @@ require(dojoConfig, [], function() {
 							if (this.zoomToFit) {
 								this._zoomToFitDeclarations(objs);
 							} else {
-								this.zoomFitLevel = undefined;
+								this.declarationsExtent = undefined;
 							}
 
 							this._createExistingDeclarationsLayer(objs);
