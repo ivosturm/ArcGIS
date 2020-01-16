@@ -280,7 +280,7 @@ require(dojoConfig, [], function() {
 				} else {
 					this._referenceMxObjectsArr = [obj];
 					this._refreshMap();
-				}
+				} 
 				callback();
 			},
 			resize: function(box) {
@@ -739,7 +739,9 @@ require(dojoConfig, [], function() {
 							}),
 							function(projectedPoints) {
 								if (!this.declarationsExtent){/* check again, because this is async */
-									this._gisMap.centerAndZoom(projectedPoints[0], zoom);
+									this._gisMap.centerAt(projectedPoints[0]);
+									this._gisMap.setZoom(zoom);
+									//this._gisMap.centerAndZoom(projectedPoints[0], zoom);
 								}
 							}.bind(this)
 						);
@@ -749,7 +751,9 @@ require(dojoConfig, [], function() {
 							latitude,
 							new SpatialReference({ wkid: Number(this.spatialReference) })
 						);
-						this._gisMap.centerAndZoom(locationPt, zoom);
+						this._gisMap.centerAt(locationPt);
+						this._gisMap.setZoom(zoom);
+						//this._gisMap.centerAndZoom(locationPt, zoom);
 					}
 				}
 			},
