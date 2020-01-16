@@ -2074,7 +2074,7 @@ require(dojoConfig, [], function() {
 					location = projectedPoints[0];
 				} else {
 					location = new Point(
-						Number(this.DefaultX),
+						Number(this.defaultX),
 						Number(this.defaultY),
 						new SpatialReference({ wkid: Number(this.spatialReference) })
 					);
