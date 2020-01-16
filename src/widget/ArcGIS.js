@@ -486,7 +486,9 @@ require(dojoConfig, [], function() {
 					console.log(this._logNode + "._loadMap");
 				}
 
-				this._gpsLocation = await this._getGPSLocation();
+				const gpsLocation = this.centerOnLocation
+					? await this._getGPSLocation()
+					: undefined;
 
 				//This specifies the symbols highlighting selected/queried objects
 				var popup = new esri.dijit.Popup(
@@ -677,15 +679,15 @@ require(dojoConfig, [], function() {
 					}.bind(this)
 				);
 
-				if (this._gpsLocation && this.centerOnLocation) {
+				if (gpsLocation && gpsLocation!== -1 && this.centerOnLocation) {
 					this._zoomToLocation(
-						Number(this._gpsLocation.longitude),
-						Number(this._gpsLocation.latitude),
+						Number(gpsLocation.longitude),
+						Number(gpsLocation.latitude),
 						this.zoomlevel
 					);
 				} else {
 					this._zoomToLocation(
-						Number(this.DefaultX),
+						Number(this.defaultX),
 						Number(this.defaultY),
 						this.zoomlevel,
 						false
@@ -2222,12 +2224,17 @@ require(dojoConfig, [], function() {
 
 			_initNewDeclaration: async function() {
 				let location = undefined;
-				if (this.centerOnLocation && (await this._getGPSLocation())) {
-					const gpslocation = await this._getGPSLocation();
-					location = await this._projectPoint([
-						new esri.geometry.Point(gpslocation.longitude, gpslocation.latitude)
+				if (
+					this.centerOnLocation &&
+					(await this._getGPSLocation()) &&
+					(await this._getGPSLocation()) !== -1
+				) {
+					const { longitude, latitude } = await this._getGPSLocation();
+					const projectedPoints = await this._projectPoint([
+						new esri.geometry.Point(longitude, latitude)
 					]);
-					location = location[0];
+
+					location = projectedPoints[0];
 				} else {
 					location = new esri.geometry.Point(
 						Number(this.DefaultX),
@@ -2382,18 +2389,19 @@ require(dojoConfig, [], function() {
 				}
 			},
 			_updateNewDeclarationLocation(longitude, latitude) {
-				this.DeclarationLongitude &&
-					this._contextObj.set(
-						this.DeclarationLongitude,
-						Number(longitude).toFixed(8)
-					);
-				this.DeclarationLatitude &&
-					this._contextObj.set(
-						this.DeclarationLatitude,
-						Number(latitude).toFixed(8)
-					);
-
-				this.onNewReportChangeMF && this._execNewReportChangekMf();
+				if (longitude && latitude) {
+					this.DeclarationLongitude &&
+						this._contextObj.set(
+							this.DeclarationLongitude,
+							Number(longitude).toFixed(8)
+						);
+					this.DeclarationLatitude &&
+						this._contextObj.set(
+							this.DeclarationLatitude,
+							Number(latitude).toFixed(8)
+						);
+          
+			    this.onNewReportChangeMF && this._execNewReportChangekMf();
 			},
 			_getDeclarationsData: function() {
 				if (this.getReportsMF) {
