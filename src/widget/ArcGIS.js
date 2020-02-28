@@ -58,14 +58,10 @@ var dojoConfig = {
 	async: false,
 	locale: "en",
 	paths: {
-		react: "https://cdnjs.cloudflare.com/ajax/libs/react/15.5.4/react.min",
-		"react-dom":
-			"https://cdnjs.cloudflare.com/ajax/libs/react/15.5.4/react-dom.min",
-		openlayers: "https://cdnjs.cloudflare.com/ajax/libs/ol3/4.1.0/ol",
-		dojox: "https://js.arcgis.com/3.31/dojox",
-		esri: "https://js.arcgis.com/3.31/esri",
-		moment: "https://js.arcgis.com/3.31/moment",
-		eDojo: "https://js.arcgis.com/3.31/dojo"
+		dojox: "../../widgets/ArcGIS/lib/dojox",
+		esri: "../../widgets/ArcGIS/lib/esri",
+		moment: "../../widgets/ArcGIS/lib/moment",
+		eDojo: "../../widgets/ArcGIS/lib/dojo"
 	}
 };
 
