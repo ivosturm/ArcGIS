@@ -1,10 +1,11 @@
 /*
     ArcGIS Widget
     ========================
+
     @file      : arcgis.js
-    @version   : 1.2.2
+    @version   : 1.3.0
     @author    : Ivo Sturm
-    @date      : 04-08-2019
+    @date      : 24-07-2020
     @copyright : First Consulting
     @license   : Apache v2
 	
@@ -47,6 +48,17 @@
 	v1.2.2
 	- fix for unsubscribe not working in listen-to-grid scenario in Mendix 7.23.6 not working anymore. removed some obsolete logging as well
 	
+	v1.3.0
+	- Upgraded to Mendix 8(.6.4)
+	- Bugfix 1: only overrule default ArcGIS styling when asked for in Modeler and only for query layer
+	- Bugfix 2: Only allow at maximum 1000 objects in Mendix to be fed to query defintion, lese ArcGIS server will struggle with amount of data.
+	- Bugfix 3: Only when search is enabled add placeholder text. When search was disabled this gave an error in browser consoleNew
+	- Bugfic 4: Added overflow-x = "auto" to legend, needed if there are many layers loaded having more height than window
+	- Improvement: modal progress bar added when loading the objects from Mendix on the ArcGIS map
+	- New Feature 1: Use Dynamic Host Name
+	- New Feature 2: if FeatureServer only has one layer, the legend will show the amount of objects loaded in that layer
+	- New Feature 3: if full width (set width to 10.000) is selected, stretch to 95 % percent of the view width
+																										 
 	Not in this version
 	========================
 	- Editing / Drawing
@@ -545,7 +557,7 @@ require(dojoConfig, [], function() {
 						// add second child button which triggers microflow on click
 						actionList.appendChild(this._mfBtn);
 						
-						on(this._mfBtn,'click', dojo.hitch(this, function(e) {
+						on(this._mfBtn,'click', lang.hitch(this, function(e) {
 							
 							this._getMxObject(graphic,this._execMf,this);
 												
@@ -589,24 +601,35 @@ require(dojoConfig, [], function() {
 				});
 				// after layer load, add the legend and toggle checkboxes for toggling layer visiblity
 				this._gisMap.on('layers-add-result', lang.hitch(this, function (evt) {
-											
-					if (this.consoleLogging){
-						for (var i = 0; i < evt.layers.length; i++)  
-						{  
-							var result = (evt.layers[i].error == undefined) ? "OK" : evt.layers[i].error.message;  
-							console.log(" - " + evt.layers[i].layer.id + ": " + result);  
-						} 
-					}
 					
-					var layers = evt.layers;
+					// get correct layer from layercache based on geometryType.
+					var queryLayer = this.layerArr.filter(lang.hitch(this,function( layer ) {
+
+					  return layer.queryLayer;
+					}))[0];	
+
+					var layerResult = evt.layers;
 					
-					layers = arrayUtils.map(layers, function(result) {
-						return result.layer;
-					});
+					for (var i = 0; i < evt.layers.length; i++)  
+					{  
+						var result = (layerResult[i].error == undefined) ? "OK" : layerResult[i].error.message;  
+						console.log(" - " + layerResult[i].layer.id + ": " + result);  
+
+						// only overrule default ArcGIS styling when asked for in Modeler and only for query layer
+						
+						if (this.enableCustomStyling && layerResult[i].layer.id === queryLayer.id) {
+
+							var uniqueValueRenderer = this._updateRenderer(layerResult[i].layer,"point");
+							layerResult[i].layer.setRenderer(uniqueValueRenderer);
+
+						}
+					} 
+						
 					// add layer-add-result handler to gismap
-					this._layerAddResultsEventHandler(layers);
-				 }));
-							
+					this._layerAddResultsEventHandler();
+					
+				}));
+	   
 				var toggle = new esri.dijit.BasemapToggle({
 					map: this._gisMap,
 					basemap: "satellite",
@@ -664,7 +687,8 @@ require(dojoConfig, [], function() {
 							featureLayerID : this.layerArray[j].featureLayerID,
 							geometryType : this.layerArray[j].layerGeometryType,
 							opacity : this.layerArray[j].opacity,
-							queryLayer : this.layerArray[j].queryLayer
+							queryLayer : this.layerArray[j].queryLayer,
+							useDynamicFSHostName : this.layerArray[j].useDynamicFSHostName																		
 						};
 						// add layer + settings to map. These options are shared between FeatureLayer and ArcGISDynamicWebserviceLayer
 					  layerOpts = {
@@ -674,20 +698,15 @@ require(dojoConfig, [], function() {
 								  "wkid" : Number(this.spatialReference)
 							  }
 					   };
-					   // if featureserver is environment dependent, hence gotten from DS MF, use that url part. Will only work for 1 FeatureServer for now...
-					   if (this.getFeatureServerNameMF){
-						   layerSpecificURL = this.hostName + this.midFix + this._layerName;
-					   } 
-					   // else use url of specific layer
-					   else {
-						   layerSpecificURL = this.hostName + this.midFix + layerObj.url;
+					   if (layerObj.serverType === 'MapServer' || layerObj.serverType === 'FeatureServer'){
+										 						
+						layerSpecificURL = this._createLayerURL(layerSpecificURL,layerObj);
+
+							if (this.consoleLogging){
+								console.log(this._logNode + this._logNode + "Full URL (HostName + Layer URL): " + layerSpecificURL + " and options: ");
+								console.dir(this._logNode + layerOpts);
+							}
 					   }
-					   
-					   
-						if (this.consoleLogging){
-							console.log(this._logNode + this._logNode + "Full URL (HostName + Layer URL): " + layerSpecificURL + " and options: ");
-							console.dir(this._logNode + layerOpts);
-						}
 
 						this.layerArr.push(layerObj);
 						
@@ -705,7 +724,7 @@ require(dojoConfig, [], function() {
 								
 								layerOpts.imageParameters =  imageParameters;
 								
-								arcGisLayer = new esri.layers.ArcGISDynamicMapServiceLayer(layerSpecificURL + "/MapServer", layerOpts);
+								arcGisLayer = new esri.layers.ArcGISDynamicMapServiceLayer(layerSpecificURL, layerOpts);
 								// a MapServer can hold multiple layers
 								if (layerObj.indexes){
 									var layerIndexesStringArray = layerObj.indexes.split(",");
@@ -727,25 +746,21 @@ require(dojoConfig, [], function() {
 
 								// if token available append to url, else could give token required errors in browser
 								if (this._token){
-									arcGisLayer = new esri.layers.FeatureLayer(layerSpecificURL + "/FeatureServer/" + layerObj.featureLayerID + "?token=" + this._token, layerOpts);
+									arcGisLayer = new esri.layers.FeatureLayer(layerSpecificURL + "?token=" + this._token, layerOpts);
 								} 
 								else {
-									arcGisLayer = new esri.layers.FeatureLayer(layerSpecificURL + "/FeatureServer/" + layerObj.featureLayerID, layerOpts);
+									arcGisLayer = new esri.layers.FeatureLayer(layerSpecificURL, layerOpts);
 									arcGisLayer.setOpacity(layerObj.opacity);
 								}
-								
-								if (this._queryDefinition){
-									// only overrule default ArcGIS styling when asked for in Modeler
-									if (this.enableCustomStyling) {
-										var uniqueValueRenderer = this._updateRenderer(arcGisLayer,layerObj.geometryType);
-										arcGisLayer.setRenderer(uniqueValueRenderer);
-									}
-									if (!this.showAllObjectsInLayer) {
-										// enforce query definition on objects shown on map
+	  
+								if (!this.showAllObjectsInLayer) {
+									// enforce query definition on objects shown on map only if less than 1000 objects are chosen. Else operation becomes too heavy
+									if (this._referenceMxObjectsArr.length <= 1000){
 										arcGisLayer.setDefinitionExpression(this._queryDefinition);
-									}
+									} 
 								}
-							}
+
+							} 
 
 							// add own name to id, so can later on be retrieved in _refreshMap
 							arcGisLayer.id = layerObj.id;
@@ -771,13 +786,11 @@ require(dojoConfig, [], function() {
 				var gisMapIds = this._gisMap.graphicsLayerIds;
 				// get the layer that is being queried on				
 				var layerID = gisMapIds.filter(lang.hitch(this,function( id ) {
-
-				  return id = this._queryLayerObj.id;
+				  return id = this._queryLayerObj.id;														 																			   
 				}))[0];
-				
+				  			
 				// only when reference DataView and Reference Entity have been set, narrow down objects by adding a queryDefinition
-				if (layerID){
-					
+				if (layerID){											 		  
 					var updateLayer = this._gisMap.getLayer(layerID);
 
 					if (this.enableCustomStyling){
@@ -793,12 +806,11 @@ require(dojoConfig, [], function() {
 						updateLayer.setDefinitionExpression(this._queryDefinition);
 					}
 					// applying querydefintion to layer which results in getting and setting extent on this._gisMap
-					this._getExtentFromQueryDef(this._queryLayerObj, this._queryDefinition);
-					
-				} 
+					this._getExtentFromQueryDef(this._queryLayerObj, this._queryDefinition);				
+				} 	
 			},
-			_createSimpleMarkerSymbol : function(){
-				switch (this.markerSymbol) {
+			_createSimpleMarkerSymbol : function(markerSymbol){
+				switch (markerSymbol) {
 				  case "STYLE_CIRCLE":
 					return esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE;
 				  case "STYLE_CROSS":
@@ -814,7 +826,7 @@ require(dojoConfig, [], function() {
 			_updateRenderer: function (layer,geometryType) {
 
 				// determine symbol
-				this._simpleMarkerSymbol = this._createSimpleMarkerSymbol();
+				this._simpleMarkerSymbol = this._createSimpleMarkerSymbol(this.markerSymbol);
 
 				var objectid,
 				color,
@@ -845,15 +857,27 @@ require(dojoConfig, [], function() {
 
 				// try to retrieve original symbol if renderer is SimpleRenderer
 				if (layer.renderer && layer.renderer.symbol){
-					console.log(1);
-					console.dir(layerSymbol);
+
 					layerSymbol = layer.renderer.symbol;
 					
 				} 
 				// if different layer type, retrieve symbol from first graphic, assuming all are same in layer
-				else if (layer.graphics[0]){
-					layerSymbol = layer.graphics[0].symbol;
-					
+				else if (layer.graphics[0] && layer.graphics[0].symbol){			
+					layerSymbol = layer.graphics[0].symbol;				
+				}
+				// if all fails, resort to defaultSymbol 
+				else {
+					layerSymbol = defaultSymbol;
+				}
+				var layerSymbol;
+
+				// try to retrieve original symbol if renderer is SimpleRenderer
+				if (layer.renderer && layer.renderer.symbol){			
+					layerSymbol = layer.renderer.symbol;					
+				} 
+				// if different layer type, retrieve symbol from first graphic, assuming all are same in layer
+				else if (layer.graphics[0] && layer.graphics[0].symbol){			
+					layerSymbol = layer.graphics[0].symbol;				
 				}
 				// if all fails, resort to defaultSymbol 
 				else {
@@ -889,7 +913,7 @@ require(dojoConfig, [], function() {
 						// new marker symbol based on color of object
 						newSymbol = new esri.symbol.SimpleMarkerSymbol(this._simpleMarkerSymbol, 10,
 								new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-									new esri.Color(featureColorBorderColor), 2), // border color
+									new esri.Color(featureColorBorderColor), 4), // border color
 								new esri.Color(featureColorFillColor) // fill color
 							);
 					} else {
@@ -923,6 +947,7 @@ require(dojoConfig, [], function() {
 								label: "Label Unknown"
 							}
 						}
+	  
 						renderer.addValue(infoValue);						
 					}		
 				}
@@ -1010,12 +1035,19 @@ require(dojoConfig, [], function() {
 				}
 				var identifyTaskLayerURL = "";
 
+				if (!layerObj.useDynamicFSName){
+					identifyTaskLayerURL = layerObj.url;
+				} else {
+					identifyTaskLayerURL = this.hostName + this.midFix + layerObj.url;								
+				}
+
 				if (layerObj.serverType === "FeatureServer"){
-					identifyTaskLayerURL = this.hostName + this.midFix + layerObj.url + "/FeatureServer/" + layerObj.featureLayerID;
+					identifyTaskLayerURL += "/FeatureServer/" + layerObj.featureLayerID;
 				}
 				else if (layerObj.serverType === "MapServer"){
-					identifyTaskLayerURL = this.hostName + this.midFix + layerObj.url + "/MapServer/" + layerObj.visibleLayerIds;
+					identifyTaskLayerURL += "/MapServer/" + layerObj.visibleLayerIds;
 				}
+
 				var qt = new esri.tasks.QueryTask(identifyTaskLayerURL);		
 					
 				qt.execute(query,lang.hitch(this, function(response) {
@@ -1076,12 +1108,8 @@ require(dojoConfig, [], function() {
 
 				var identifyTaskLayerURL = "";
 							
-				if (layerObj.serverType === "FeatureServer"){
-					identifyTaskLayerURL = this.hostName + this.midFix + layerObj.url + "/FeatureServer/" + layerObj.featureLayerID;
-				}
-				else if (layerObj.serverType === "MapServer"){
-					identifyTaskLayerURL = this.hostName + this.midFix + layerObj.url + "/MapServer/" + layerObj.visibleLayerIds;
-				}
+				identifyTaskLayerURL = this._createLayerURL(identifyTaskLayerURL,layerObj);
+
 				var qt = new esri.tasks.QueryTask(identifyTaskLayerURL);		
 					
 				qt.execute(q,lang.hitch(this, function(response) {
@@ -1120,6 +1148,29 @@ require(dojoConfig, [], function() {
 				
 				//return centerLocation;
 				
+			},
+			_createLayerURL : function(url,layerObj){
+				if (!layerObj.useDynamicFSHostName){
+					url = layerObj.url;
+				} else {
+					url = this.hostName + this.midFix;
+					// if featureserver is environment dependent, hence gotten from DS MF, use that url part. Will only work for 1 FeatureServer for now...
+					if (this.getFeatureServerNameMF){
+						url += this._layerName;
+					} 
+					// else use url of specific layer
+					else {
+						url += layerObj.url;
+					}							
+				}
+
+				if (layerObj.serverType === "FeatureServer"){
+					url += "/FeatureServer/" + layerObj.featureLayerID;
+				}
+				else if (layerObj.serverType === "MapServer"){
+					url += "/MapServer/" ;
+				}
+				return url;
 			},
 			_getTextContent : function(graphic){
 				if (this.consoleLogging){
@@ -1182,11 +1233,12 @@ require(dojoConfig, [], function() {
 					arrowNode =  this._gisMap.infoWindow.domNode.querySelector(".pointer");  
 					arrowNode.classList.add("hidden");  
 				}).bind(this));
-				
-				// set default placeholder text. Somehow this is not working when setting property before startup.
-				dojo.query(".searchInputGroup input")[0].placeholder = "Zoek adres of plaats";
+				if (this.enableSearch){
+					// set default placeholder text. Somehow this is not working when setting property before startup.
+					dojo.query(".searchInputGroup input")[0].placeholder = "Search for address or place";
+				}
 			},
-			_layerAddResultsEventHandler : function(layers){
+			_layerAddResultsEventHandler : function(){
 			
 				// set extent if a queryDefinition is given and a layer to be queried on is known
 				if (this._queryLayerObj && this._queryDefinition){
@@ -1195,18 +1247,80 @@ require(dojoConfig, [], function() {
 				
 				else if (this.objectid){
 					this.zoomRow(this.objectid,this.centerCoordinates,this.geometryType);
+				} 
+				// added for proper zooming of graphicslayer
+				else if (this._referenceMxObjectsArr.length == 1){
+					this._extent.setSpatialReference(this._gisMap.spatialReference);
+					this._gisMap.centerAndZoom(this._extent.getCenter(),Number(this._singleObjectZoom) - 1);
+				} else if (this._referenceMxObjectsArr.length > 1) {
+					this._gisMap.setExtent(this._extent);
 				} else {
 					this.zoomRow();
-				}
+				} 
 
 				 if (this.enableLegend){
+
 					 // add the legend
 					var legend = new esri.dijit.Legend({
 						map: this._gisMap,
 						layerInfos: this.legendLayers
 					}, this.legendDiv);
+
 					legend.startup();
+
+										  
+								   
+									
+						 
+
+												  
+												
+								 
+			  
+					  
+	   
+			 
+	 
+										   
+										 
+	   
+
+																			 
+																	  
+																			
+																					   
+																			
+																							 
+																			
+																	   
+																									 
+																		   
+																		   
+
+												   
+												  
+								 
+			  
+					  
+	   
+		
+
+												   
+												  
+							   
+					 
+					 
+					   
+					
+
+														  
+														   
+
+																					 
+
 				 }
+
+	 
 
 				if (this.enableToggleLayers){	
 					var subLayerArray = [],
@@ -1237,6 +1351,12 @@ require(dojoConfig, [], function() {
 							noOfSubLayers = subLayerArray.length;
 						} 
 						
+						if (noOfSubLayers == 0 || noOfSubLayers == 1){
+							if (layer.layer && layer.layer.graphics){
+								noOfSubLayers = layer.layer.graphics.length;
+							}
+						}
+	  
 						var layerName = layer.title;
 						
 						var span = dom.create("span",{
@@ -1259,7 +1379,8 @@ require(dojoConfig, [], function() {
 							innerHTML: layerName,
 							style: {
 								"font-weight" : 700
-							}	
+							},
+							class: "layer" + layerName 										  
 						},"  " + layerName + " (" + noOfSubLayers + ") ",span);
 					  
 						var checkBox = dom.create("input",{
@@ -1381,6 +1502,33 @@ require(dojoConfig, [], function() {
 				 }
 				
 			},
+															   
+	
+																			 
+
+								 
+	
+								   
+				 
+						  
+						
+			
+					
+						  
+				 
+								 
+	  
+			  
+
+													   
+					  
+																					
+
+													   
+
+									   
+
+	 
 			zoomRow : function(id,centerCoordinates,geometryType) {
 				
 				if (this.consoleLogging){
@@ -1537,7 +1685,14 @@ require(dojoConfig, [], function() {
 					height: this.mapHeight + 'px',
 					width: this.mapWidth + 'px'
 				});				
-		
+
+				// if full width is selected, stretch to 95 % percent of the view width
+				if (this.mapWidth == 10000){					
+					domStyle.set(this.domNode, {
+						width: '95vw'
+					});	
+				}														  
+  
 			},
 			// Retrieves all objects related to the ArcGISDataView via XPath or DataSource MF and store in array in cache
 			_getReferenceMxObjects : function(callback,update){
@@ -1579,14 +1734,18 @@ require(dojoConfig, [], function() {
 					if (this.consoleLogging){
 						console.log(this._logNode + 'get from DS MF set from Modeler');
 					}
-					var guid = this._contextObj.getGuid();				
-					mx.data.action({
+					var guids = [];
+					if (this._contextObj){
+						guids =[this._contextObj.getGuid()];
+					}				
+					mx.ui.action(this._getObjectsMF,{
 						params: {
-							applyto: 'selection',
-							actionname: this._getObjectsMF,
-							guids: [guid]
+							applyto: 'selection',									  
+							guids: guids
 						},
 						origin: this.mxform,
+						progress: "modal",
+						progressMsg: "Loading objects...",		   
 						callback: lang.hitch(this, function (objs) {
 							if (this.consoleLogging){
 								console.log(this._logNode + "Received " + objs.length + " MxObjects: ");
@@ -1631,20 +1790,20 @@ require(dojoConfig, [], function() {
 				var MxObj = null;
 				// try to find MxObj in cache, should be filled when using a reference DataView
 				if (this._referenceMxObjectsArr && this._referenceMxObjectsArr.length > 0){
+								 		 
 					MxObj = this._referenceMxObjectsArr.filter(lang.hitch(this,function( obj ) {
 
 					  return (obj.get(this.objectIDAttr) == graphic.attributes[this.arcGISID] && obj.get(this.geometryTypeAttr) == graphic.geometry.type);
-					}))[0];
-					
+					}))[0];				
 					// this transferred to context variable, since this is reserved word in callback...
 					if (callback && typeof callback == "function"){
 						callback(MxObj,context);
-					}
-					
-				}
+					}				
+				}	
 				// if no reference DataView is there, hence _getReferenceMxObjects has not been kicked off, do a direct database retrieve
 				else {
 					var xpath = "//" + this.objectEntity + "[" + this.objectIDAttr + " = " + graphic.attributes[this.arcGISID] + " and " + this.geometryTypeAttr + " = '" + graphic.geometry.type + "']";
+
 					if (this.consoleLogging){
 						console.log(this._logNode + xpath);
 					}
@@ -1659,8 +1818,7 @@ require(dojoConfig, [], function() {
 							callback(MxObj,context);
 						})
 					});	
-				}
-				 
+				}	 
 			},
 			// creates all HTML elements needed, so placeholder for legend, drawing, map, toolbar, etc.
 			_createTemplate : function() {
@@ -1740,7 +1898,10 @@ require(dojoConfig, [], function() {
 					if (this.enableLegend){
 						var legendPane = new dijit.layout.ContentPane({
 							className: 'legendPane',
-							title: 'Legenda'
+							title: 'Legend',
+							style: {
+								"overflow-x" : "auto"
+							}
 						});
 						this.legendDiv = domConstruct.create('div', {
 							className: 'legendDiv'
@@ -1797,8 +1958,8 @@ require(dojoConfig, [], function() {
 			_createQueryDefinition : function(){
 				var queryDefinition = '';
 				
-				// create query definition_create QueryDefinition
-				if (this._referenceMxObjectsArr.length > 0){
+				// create query definition if there are Mendix objects, but less than 1000 are selected / fed to ArcGIS. More than 1000 will give weird results.
+				if (this._referenceMxObjectsArr.length > 0 && this._referenceMxObjectsArr.length < 1000){
 
 					// create an IN statement for all retrieved objects
 					queryDefinition = this.arcGISID + " IN (";
