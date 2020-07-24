@@ -134,7 +134,7 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
         <property key="mapWidth" type="integer" defaultValue="900">
             <caption>Width</caption>
             <category>Appearance</category>
-            <description>The map's width in pixels.</description> 
+            <description>The map's width in pixels. Setting it to 10.000 will set it to 95 % of the width of the screen and will resize it dynamically when zooming.</description> 
         </property>
 		<property key="customColor" type="string" required="false" defaultValue="#FF0000">
             <caption>Custom Color</caption>
@@ -185,6 +185,11 @@ cf8ASFx/Mz8R+KvhPH+Dwijv6xNCuttSgx0Wqkl9GNZxBESIL1W9zH1lADpf6q0FvNKltYxDHtYs
                     <category>Layer</category>
                     <description>The URL of the layer.</description>
                 </property>
+					<property key="useDynamicFSHostName" type="boolean" required="true" defaultValue="true">
+					<caption>Use Dynamic Host Name</caption>
+					<category>Layer</category>
+					<description>If set to 'Yes' the layer will be loaded with hostname URL retrieved from 'Get Hostname Microflow' + /arcgis/rest/services/ + Layer URL. If set to 'No' only the Layer URL will be used.</description>
+				</property>																								   
                 <property key="layerID" type="string">
                     <caption>Layer Name</caption>
                     <category>Layer</category>
